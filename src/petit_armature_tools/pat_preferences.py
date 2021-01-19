@@ -121,6 +121,13 @@ class PAT_AddonPreferences(bpy.types.AddonPreferences):
         update=update_panel
     )
 
+    # for add-on updater
+    updater_branch_to_update = bpy.props.EnumProperty(
+        name="branch",
+        description="Target branch to update add-on",
+        items=get_update_candidate_branches
+    )
+
     def __init__(self):
         super(bpy.types.AddonPreferences, self).__init__()
 
