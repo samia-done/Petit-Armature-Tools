@@ -27,6 +27,41 @@ import mathutils
 from .utils.bl_anotations import make_annotations
 
 
+def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, count=0, zero_padding=3):
+    """
+    名前を作成します
+    :param base_name: 名前の基本形
+    :type base_name: str
+    :param separator: 名前や数字、接頭辞、接尾辞を区切る文字
+    :type separator: str
+    :param prefix: 接頭辞
+    :type prefix: str
+    :param suffix: 接尾辞
+    :type suffix: str
+    :param start_number: 開始番号
+    :type start_number: int
+    :param count: カウントアップした後の数値
+    :type count: int
+    :param zero_padding: ゼロ埋めする際の数字の桁数
+    :type zero_padding: int
+    :return: 作成された名前
+    :rtype: str
+    """
+
+    bone_name_prefix = base_name + separator
+    bone_name_suffix = ""
+
+    if prefix:
+        bone_name_prefix = prefix + separator + bone_name_prefix
+
+    if suffix:
+        bone_name_suffix = separator + suffix
+
+    bone_name = bone_name_prefix + str(start_number + count).rjust(zero_padding, '0') + bone_name_suffix
+
+    return bone_name
+
+
 @make_annotations
 class PAT_ToolSettings(bpy.types.PropertyGroup):
     display_edge_oder = bpy.props.BoolProperty(
@@ -270,15 +305,6 @@ class PAT_OT_Base:
             current_cursor = copy.copy(bpy.context.scene.cursor_location) if bpy.app.version < (2, 80) \
                 else copy.copy(bpy.context.scene.cursor.location)
 
-            bone_name_prefix = self.pref.bone_name + self.pref.bone_name_junction
-            bone_name_suffix = self.pref.bone_name_suffix
-
-            if self.pref.bone_name_prefix != "":
-                bone_name_prefix = self.pref.bone_name_prefix + self.pref.bone_name_junction + bone_name_prefix
-
-            if self.pref.bone_name_suffix != "":
-                bone_name_suffix = self.pref.bone_name_junction + bone_name_suffix
-
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
             bpy.ops.object.add(type='ARMATURE', enter_editmode=True, location=self.location)
             armature_object = context.active_object
@@ -287,8 +313,8 @@ class PAT_OT_Base:
             normal = mathutils.Vector((0, 0, 0))
             length = len(self.new_bones)
             for i in range(length):
-                bone_name = bone_name_prefix + str(self.pref.start_number + i).rjust(self.pref.zero_padding, '0')\
-                            + bone_name_suffix
+                bone_name = create_name(self.pref.bone_name, self.pref.bone_name_junction, self.pref.bone_name_prefix,
+                                        self.pref.bone_name_suffix, self.pref.start_number, i, self.pref.zero_padding)
                 bone = bpy.context.object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
                 bone.head = self.new_bones[i]['head']
                 bone.tail = self.new_bones[i]['tail']
@@ -458,6 +484,12 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         # SelectedEdgeOrder - settings
         if pat_tool_settings.display_edge_oder:
             box = col.column(align=True).box().column()
+            boxsplit = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
+                                                                                                         align=True)
+            bone_name = create_name(pref.bone_name, pref.bone_name_junction, pref.bone_name_prefix,
+                                    pref.bone_name_suffix, pref.start_number, 0, pref.zero_padding)
+            boxsplit.label(text="Bone Name")
+            boxsplit.label(text='Ex: '+bone_name)
             box.prop(pref, "bone_name")
             box.prop(pref, "bone_name_junction")
             box.prop(pref, "bone_name_prefix")
