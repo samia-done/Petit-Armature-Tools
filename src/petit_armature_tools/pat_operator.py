@@ -59,6 +59,12 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         default=True,
         options={'HIDDEN'}
     )
+    use_offset = bpy.props.BoolProperty(
+        name="Offset",
+        description="Bone location offset",
+        default=False,
+        options={'HIDDEN'}
+    )
     # bone_name = bpy.props.StringProperty(
     #     name="BoneName",
     #     description="Bone name",
@@ -447,7 +453,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
                             text="Selected Edge Order")  # type: PAT_OT_SelectedEdgeOrder
         op.use_auto_bone_roll = pat_tool_settings.use_auto_bone_roll
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
-        op.use_offset = True
+        op.use_offset = pat_tool_settings.use_offset
 
         # SelectedEdgeOrder - settings
         if pat_tool_settings.display_edge_oder:
@@ -458,12 +464,16 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             box.prop(pref, "bone_name_suffix")
             box.prop(pref, "start_number")
             box.prop(pref, "zero_padding")
-            box.prop(pat_tool_settings, "edge_offset")
             box.prop(pat_tool_settings, "use_auto_bone_roll")
             box.prop(pat_tool_settings, "use_auto_bone_weight")
             box.prop(pref, "is_parent")
             # box.prop(pref, "is_reverse")
             box.prop(pref, "use_connect")
+            row = box.row(align=True)
+            row.prop(pat_tool_settings, "use_offset")
+            row = row.row(align=True)
+            row.prop(pat_tool_settings, "edge_offset")
+            row.active = pat_tool_settings.use_offset
 
         split = col.split(percentage=0.15, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.15,
                                                                                                    align=True)
