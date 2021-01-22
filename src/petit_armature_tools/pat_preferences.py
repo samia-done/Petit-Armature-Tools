@@ -93,7 +93,7 @@ class PAT_AddonPreferences(bpy.types.AddonPreferences):
         name="Zero-padding",
         description="Zero-padding of digits in bone names",
         default=3,
-        min=0,
+        min=1,
     )
 
     is_reverse = bpy.props.BoolProperty(
