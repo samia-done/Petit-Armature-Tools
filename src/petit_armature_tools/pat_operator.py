@@ -228,6 +228,8 @@ class PAT_OT_Base:
         tail = None
         head_indexes = []
         tail_indexes = []
+
+        mwi = self.matrix_world.inverted()
         for i, e in enumerate(select_edges):
             e.select = True
             bpy.ops.mesh.loop_multi_select(ring=False)
@@ -239,17 +241,24 @@ class PAT_OT_Base:
 
             if i == 0:
                 head_indexes = [v.index for s_e in bm.edges if s_e.select == True for v in s_e.verts]
+
                 bpy.ops.view3d.snap_cursor_to_selected()
-                head = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
-                    else copy.copy(context.scene.cursor.location)
+                local_pos = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                    else mwi @ context.scene.cursor.location
+
+                head = copy.copy(local_pos) if bpy.app.version < (2, 80) \
+                    else copy.copy(local_pos)
             else:
                 tail_indexes = [v.index for s_e in bm.edges if s_e.select == True for v in s_e.verts]
-                bpy.ops.view3d.snap_cursor_to_selected()
-                tail = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
-                    else copy.copy(context.scene.cursor.location)
 
-                new_bones.append({"indexes": tuple(head_indexes + tail_indexes),
-                                  "head": head, "tail": tail, "roll": 0})
+                bpy.ops.view3d.snap_cursor_to_selected()
+                local_pos = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                    else mwi @ context.scene.cursor.location
+
+                tail = copy.copy(local_pos) if bpy.app.version < (2, 80) \
+                    else copy.copy(local_pos)
+
+                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail, "roll": 0})
                 head = tail
                 head_indexes = tail_indexes
 
@@ -270,6 +279,7 @@ class PAT_OT_Base:
             bpy.context.preferences.addons[__package__].preferences
         self.active = None
         self.bm = None
+        self.matrix_world = None
         self.location = (0, 0, 0)
         self.new_bones = []
 
@@ -306,8 +316,10 @@ class PAT_OT_Base:
                 else copy.copy(bpy.context.scene.cursor.location)
 
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-            bpy.ops.object.add(type='ARMATURE', enter_editmode=True, location=self.location)
+            bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
+            print(context.active_object)
             armature_object = context.active_object
+            armature_object.matrix_world = self.matrix_world
 
             parentBone = None
             normal = mathutils.Vector((0, 0, 0))
@@ -344,8 +356,8 @@ class PAT_OT_Base:
                 bpy.ops.transform.translate(value=normal)
 
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-            bpy.ops.view3d.snap_cursor_to_center()
-            bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
             if self.use_auto_bone_weight:
                 if hasattr(context, "view_layer"):
@@ -396,6 +408,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
             return {'FINISHED'}
 
         self.location = self.active.location
+        self.matrix_world = self.active.matrix_world
         self.new_bones = self._get_select_edge_location(context, self.bm)
 
         # --- if none report an error and quit
@@ -427,6 +440,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             self.report({'ERROR'}, "This mesh does not have multiple edges")
             return {'FINISHED'}
 
+        self.matrix_world = self.active.matrix_world
         self.new_bones = self._get_select_edge_loops_location(context, self.bm)
 
         # --- if none report an error and quit
