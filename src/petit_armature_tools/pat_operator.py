@@ -382,7 +382,7 @@ class PAT_OT_Base:
                 bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
                 bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
-                bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+                bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
             if bpy.app.version < (2, 80):
                 bpy.context.scene.cursor_location = current_cursor
