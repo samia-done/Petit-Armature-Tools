@@ -100,49 +100,53 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         default=False,
         options={'HIDDEN'}
     )
-    # bone_name = bpy.props.StringProperty(
-    #     name="BoneName",
-    #     description="Bone name",
-    #     default="Bone"
-    # )
-    #
-    # bone_name_junction = bpy.props.StringProperty(
-    #     name="BoneNameSeparator",
-    #     description="Bone name separator",
-    #     default="."
-    # )
-    #
-    # bone_name_suffix = bpy.props.StringProperty(
-    #     name="BoneNameSuffix",
-    #     description="Bone name suffix",
-    #     default=""
-    # )
-    #
-    # zero_padding = bpy.props.IntProperty(
-    #     name="Zeropadding",
-    #     description="Number of digits of bone name zero padding",
-    #     default=3,
-    #     min=0,
-    #     max=6
-    # )
-    #
+    bone_name = bpy.props.StringProperty(
+        name="Bone Name",
+        description="Bone name",
+        default="Bone"
+    )
+    bone_name_junction = bpy.props.StringProperty(
+        name="Bone Name Separator",
+        description="Bone name separator",
+        default="."
+    )
+    bone_name_prefix = bpy.props.StringProperty(
+        name="Bone Name Prefix",
+        description="Bone name prefix",
+        default=""
+    )
+    bone_name_suffix = bpy.props.StringProperty(
+        name="Bone Name Suffix",
+        description="Bone name suffix",
+        default=""
+    )
+    start_number = bpy.props.IntProperty(
+        name="Start Number",
+        description="Starting number of bone name",
+        default=1,
+        min=0,
+    )
+    zero_padding = bpy.props.IntProperty(
+        name="Zero-padding",
+        description="Zero-padding of digits in bone names",
+        default=3,
+        min=1,
+    )
     # is_reverse = bpy.props.BoolProperty(
     #     name="Reverse",
     #     description="Change the bone order to the reverse order",
     #     default=False
     # )
-    #
-    # is_parent = bpy.props.BoolProperty(
-    #     name="Parent",
-    #     description="Set parent bone",
-    #     default=True
-    # )
-    #
-    # use_connect = bpy.props.BoolProperty(
-    #     name="Connected",
-    #     description="When Bone has a parent,bone's head is stuck tp the parent's tail",
-    #     default=True
-    # )
+    is_parent = bpy.props.BoolProperty(
+        name="Parent",
+        description="Set parent bone",
+        default=True
+    )
+    use_connect = bpy.props.BoolProperty(
+        name="Connected",
+        description="When Bone has a parent,bone's head is stuck tp the parent's tail",
+        default=True
+    )
 
 
 @make_annotations
@@ -184,7 +188,7 @@ class PAT_OT_Base:
                 if head:
                     if self._get_distance(head.co, v0.co) > self._get_distance(head.co, v1.co):
                         v0, v1 = v1, v0
-                    if not self.pref.use_connect:
+                    if not self.pat_tool_settings.use_connect:
                         head = v0
                     tail = v1
                 else:
@@ -275,8 +279,7 @@ class PAT_OT_Base:
         return new_bones
 
     def __init__(self):
-        self.pref = bpy.context.user_preferences.addons[__package__].preferences if bpy.app.version < (2, 80) else \
-            bpy.context.preferences.addons[__package__].preferences
+        self.pat_tool_settings = None
         self.active = None
         self.bm = None
         self.matrix_world = None
@@ -293,6 +296,7 @@ class PAT_OT_Base:
         return False
 
     def invoke(self, context, event):
+        self.pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
         self.active = context.active_object
         self.active.update_from_editmode()
 
@@ -325,8 +329,9 @@ class PAT_OT_Base:
             normal = mathutils.Vector((0, 0, 0))
             length = len(self.new_bones)
             for i in range(length):
-                bone_name = create_name(self.pref.bone_name, self.pref.bone_name_junction, self.pref.bone_name_prefix,
-                                        self.pref.bone_name_suffix, self.pref.start_number, i, self.pref.zero_padding)
+                bone_name = create_name(self.pat_tool_settings.bone_name, self.pat_tool_settings.bone_name_junction,
+                                        self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
+                                        self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding)
                 bone = bpy.context.object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
                 bone.head = self.new_bones[i]['head']
                 bone.tail = self.new_bones[i]['tail']
@@ -344,10 +349,10 @@ class PAT_OT_Base:
                     vertex_groups = self.active.vertex_groups.new(name=bone_name)
                     vertex_groups.add(self.new_bones[i]['indexes'], 1.0, 'ADD')
 
-                if self.pref.is_parent:
+                if self.pat_tool_settings.is_parent:
                     if parentBone:
                         bone.parent = parentBone
-                        bone.use_connect = self.pref.use_connect
+                        bone.use_connect = self.pat_tool_settings.use_connect
                     parentBone = bone
 
             if self.use_offset:
@@ -470,8 +475,6 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         return True
 
     def draw(self, context):
-        pref = bpy.context.user_preferences.addons[__package__].preferences if bpy.app.version < (2, 80) else \
-            bpy.context.preferences.addons[__package__].preferences  # type: PAT_AddonPreferences
         pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
 
         layout = self.layout
@@ -493,26 +496,27 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = pat_tool_settings.use_offset
 
+        bone_name = create_name(pat_tool_settings.bone_name, pat_tool_settings.bone_name_junction,
+                                pat_tool_settings.bone_name_prefix, pat_tool_settings.bone_name_suffix,
+                                pat_tool_settings.start_number, 0, pat_tool_settings.zero_padding)
         # SelectedEdgeOrder - settings
         if pat_tool_settings.display_edge_oder:
             box = col.column(align=True).box().column()
-            boxsplit = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
+            box_split = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
                                                                                                          align=True)
-            bone_name = create_name(pref.bone_name, pref.bone_name_junction, pref.bone_name_prefix,
-                                    pref.bone_name_suffix, pref.start_number, 0, pref.zero_padding)
-            boxsplit.label(text="Bone Name")
-            boxsplit.label(text='Ex: '+bone_name)
-            box.prop(pref, "bone_name")
-            box.prop(pref, "bone_name_junction")
-            box.prop(pref, "bone_name_prefix")
-            box.prop(pref, "bone_name_suffix")
-            box.prop(pref, "start_number")
-            box.prop(pref, "zero_padding")
+            box_split.label(text="Example of Bone Name")
+            box_split.label(text=bone_name)
+            box.prop(pat_tool_settings, "bone_name")
+            box.prop(pat_tool_settings, "bone_name_junction")
+            box.prop(pat_tool_settings, "bone_name_prefix")
+            box.prop(pat_tool_settings, "bone_name_suffix")
+            box.prop(pat_tool_settings, "start_number")
+            box.prop(pat_tool_settings, "zero_padding")
             box.prop(pat_tool_settings, "use_auto_bone_roll")
             box.prop(pat_tool_settings, "use_auto_bone_weight")
-            box.prop(pref, "is_parent")
-            # box.prop(pref, "is_reverse")
-            box.prop(pref, "use_connect")
+            box.prop(pat_tool_settings, "is_parent")
+            # box.prop(pat_tool_settings, "is_reverse")
+            box.prop(pat_tool_settings, "use_connect")
             row = box.row(align=True)
             row.prop(pat_tool_settings, "use_offset")
             row = row.row(align=True)
@@ -536,13 +540,17 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         # MidpointOfSelectedEdgeLoopOder - settings
         if pat_tool_settings.display_edge_loop_order:
             box = col.column(align=True).box().column()
-            box.prop(pref, "bone_name")
-            box.prop(pref, "bone_name_junction")
-            box.prop(pref, "bone_name_prefix")
-            box.prop(pref, "bone_name_suffix")
-            box.prop(pref, "start_number")
-            box.prop(pref, "zero_padding")
+            box_split = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
+                                                                                                         align=True)
+            box_split.label(text="Example of Bone Name")
+            box_split.label(text=bone_name)
+            box.prop(pat_tool_settings, "bone_name")
+            box.prop(pat_tool_settings, "bone_name_junction")
+            box.prop(pat_tool_settings, "bone_name_prefix")
+            box.prop(pat_tool_settings, "bone_name_suffix")
+            box.prop(pat_tool_settings, "start_number")
+            box.prop(pat_tool_settings, "zero_padding")
             box.prop(pat_tool_settings, "use_auto_bone_weight")
-            box.prop(pref, "is_parent")
-            # box.prop(preferences, "is_reverse")
-            box.prop(pref, "use_connect")
+            box.prop(pat_tool_settings, "is_parent")
+            # box.prop(pat_tool_settings, "is_reverse")
+            box.prop(pat_tool_settings, "use_connect")
