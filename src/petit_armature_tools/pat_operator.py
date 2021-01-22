@@ -386,7 +386,6 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def __init__(self):
-        print(self.bl_label, "__init__")
         super(PAT_OT_SelectedEdgeOrder, self).__init__()
 
     def invoke(self, context, event):
@@ -419,7 +418,6 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def __init__(self):
-        print(self.bl_label, "__init__")
         super(PAT_OT_MidpointOfSelectedEdgeLoopOder, self).__init__()
 
     def invoke(self, context, event):
