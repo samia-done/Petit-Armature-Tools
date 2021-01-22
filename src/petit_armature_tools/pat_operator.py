@@ -376,7 +376,7 @@ class PAT_OT_Base:
                     context.scene.objects.active.select = True
 
                 bpy.ops.object.modifier_add(type='ARMATURE')
-                self.active.modifiers["Armature"].object = bpy.data.objects[armature_object.name]
+                self.active.modifiers["Armature"].object = armature_object
 
                 bpy.ops.object.mode_set(mode='EDIT', toggle=False)
                 bpy.ops.mesh.select_all(action='SELECT')
