@@ -337,11 +337,6 @@ class PAT_OT_Base:
             raise TypeError("Active object is not a Mesh.")
 
         if obj:
-            pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
-
-            current_cursor = copy.copy(bpy.context.scene.cursor_location) if bpy.app.version < (2, 80) \
-                else copy.copy(bpy.context.scene.cursor.location)
-
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
             bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
             print(context.active_object)
@@ -412,10 +407,6 @@ class PAT_OT_Base:
                 bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
                 bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
-            if bpy.app.version < (2, 80):
-                bpy.context.scene.cursor_location = current_cursor
-            else:
-                bpy.context.scene.cursor.location = current_cursor
 
 
 @make_annotations
