@@ -176,7 +176,14 @@ class PAT_OT_Base:
                              (vector0[2] - vector1[2]) ** 2)
         return distance
 
-    def _get_select_edge_location(self, context, bm):
+    def _get_select_edge_location(self, context):
+        bm = bmesh.new()
+        bm = bmesh.from_edit_mesh(self.active.data)
+        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
+
         new_bones = []
         head = None
         tail = None
@@ -208,7 +215,14 @@ class PAT_OT_Base:
 
         return new_bones
 
-    def _get_select_edge_loops_location(self, context, bm):
+    def _get_select_edge_loops_location(self, context):
+        bm = bmesh.new()
+        bm = bmesh.from_edit_mesh(self.active.data)
+        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
+
         current_cursor = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
             else copy.copy(context.scene.cursor.location)
 
@@ -281,7 +295,6 @@ class PAT_OT_Base:
     def __init__(self):
         self.pat_tool_settings = None
         self.active = None
-        self.bm = None
         self.matrix_world = None
         self.location = (0, 0, 0)
         self.new_bones = []
@@ -299,13 +312,6 @@ class PAT_OT_Base:
         self.pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
         self.active = context.active_object
         self.active.update_from_editmode()
-
-        self.bm = bmesh.new()
-        self.bm = bmesh.from_edit_mesh(self.active.data)
-        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
-            self.bm.verts.ensure_lookup_table()
-            self.bm.edges.ensure_lookup_table()
-            self.bm.faces.ensure_lookup_table()
 
     def execute(self, context):
         obj = context.object
@@ -414,7 +420,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         self.location = self.active.location
         self.matrix_world = self.active.matrix_world
-        self.new_bones = self._get_select_edge_location(context, self.bm)
+        self.new_bones = self._get_select_edge_location(context)
 
         # --- if none report an error and quit
         if not self.new_bones:
@@ -446,7 +452,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             return {'FINISHED'}
 
         self.matrix_world = self.active.matrix_world
-        self.new_bones = self._get_select_edge_loops_location(context, self.bm)
+        self.new_bones = self._get_select_edge_loops_location(context)
 
         # --- if none report an error and quit
         if not self.new_bones:
