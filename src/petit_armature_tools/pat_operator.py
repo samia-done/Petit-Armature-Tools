@@ -184,12 +184,14 @@ class PAT_OT_Base:
             bm.edges.ensure_lookup_table()
             bm.faces.ensure_lookup_table()
 
+        selected_edges = []
         new_bones = []
         head = None
         tail = None
 
         for i, e in enumerate(bm.select_history):  # type: (int, bmesh.types.BMEdge)
             if isinstance(e, bmesh.types.BMEdge) and e.select:
+                selected_edges.append(e)
                 v0 = e.verts[0]
                 v1 = e.verts[1]
                 if head:
@@ -213,6 +215,10 @@ class PAT_OT_Base:
                                   "tail": copy.copy(tail.co), "roll": 0, "normal": copy.copy(normal)})
                 head = tail
 
+        for edge in selected_edges:
+            edge.select = True
+        self.active.update_from_editmode()
+
         return new_bones
 
     def _get_select_edge_loops_location(self, context):
@@ -226,10 +232,15 @@ class PAT_OT_Base:
         current_cursor = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
             else copy.copy(context.scene.cursor.location)
 
-        select_edges = []
-        for select_edge in bm.select_history:
-            if isinstance(select_edge, bmesh.types.BMEdge) and select_edge.select:
-                select_edges.append(select_edge)
+        select_history = []
+        select_history_append = select_history.append
+        for history_edge in bm.select_history:
+            if isinstance(history_edge, bmesh.types.BMEdge):
+                select_history_append(history_edge)
+
+        # 選択した辺が2つ以上無い場合は終了
+        if len(select_history) < 2:
+            return
 
         bpy.ops.mesh.select_all(action='DESELECT')
         self.active.update_from_editmode()
@@ -241,6 +252,7 @@ class PAT_OT_Base:
             bpy.ops.view3d.localview()
             current_local = True
 
+        selected_edges = []
         new_bones = []
         head = None
         tail = None
@@ -248,37 +260,38 @@ class PAT_OT_Base:
         tail_indexes = []
 
         mwi = self.matrix_world.inverted()
-        for i, e in enumerate(select_edges):
+        for i, e in enumerate(select_history):
             e.select = True
             bpy.ops.mesh.loop_multi_select(ring=False)
-
-            # 見た目の更新
-            # bmesh.update_edit_mesh(self.active.data)
-            # データの更新
             self.active.update_from_editmode()
 
-            if i == 0:
-                head_indexes = [v.index for s_e in bm.edges if s_e.select == True for v in s_e.verts]
+            # すでに選択した辺と同じ辺のときは終了
+            if e in selected_edges:
+                return
+
+            select_loop_edges = [s_e for s_e in bm.edges if s_e.select == True]
+            selected_edges += select_loop_edges
+
+            if i > 0:
+                tail_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
 
                 bpy.ops.view3d.snap_cursor_to_selected()
-                local_pos = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
                     else mwi @ context.scene.cursor.location
 
-                head = copy.copy(local_pos) if bpy.app.version < (2, 80) \
-                    else copy.copy(local_pos)
-            else:
-                tail_indexes = [v.index for s_e in bm.edges if s_e.select == True for v in s_e.verts]
+                tail = copy.copy(local_cursor_location)
 
-                bpy.ops.view3d.snap_cursor_to_selected()
-                local_pos = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
-                    else mwi @ context.scene.cursor.location
-
-                tail = copy.copy(local_pos) if bpy.app.version < (2, 80) \
-                    else copy.copy(local_pos)
-
-                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail, "roll": 0})
+                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail})
                 head = tail
                 head_indexes = tail_indexes
+            else:
+                head_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
+
+                bpy.ops.view3d.snap_cursor_to_selected()
+                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                    else mwi @ context.scene.cursor.location
+
+                head = copy.copy(local_cursor_location)
 
             bpy.ops.mesh.select_all(action='DESELECT')
 
@@ -290,13 +303,16 @@ class PAT_OT_Base:
         else:
             context.scene.cursor.location = current_cursor
 
+        for edge in selected_edges:
+            edge.select = True
+        self.active.update_from_editmode()
+
         return new_bones
 
     def __init__(self):
         self.pat_tool_settings = None
         self.active = None
         self.matrix_world = None
-        self.location = (0, 0, 0)
         self.new_bones = []
 
     @classmethod
@@ -312,6 +328,7 @@ class PAT_OT_Base:
         self.pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
         self.active = context.active_object
         self.active.update_from_editmode()
+        self.matrix_world = self.active.matrix_world
 
     def execute(self, context):
         obj = context.object
@@ -418,8 +435,6 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
             self.report({'ERROR'}, "This mesh does not have edges")
             return {'FINISHED'}
 
-        self.location = self.active.location
-        self.matrix_world = self.active.matrix_world
         self.new_bones = self._get_select_edge_location(context)
 
         # --- if none report an error and quit
@@ -451,7 +466,6 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             self.report({'ERROR'}, "This mesh does not have multiple edges")
             return {'FINISHED'}
 
-        self.matrix_world = self.active.matrix_world
         self.new_bones = self._get_select_edge_loops_location(context)
 
         # --- if none report an error and quit
