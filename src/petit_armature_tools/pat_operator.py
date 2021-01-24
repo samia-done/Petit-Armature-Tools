@@ -450,14 +450,12 @@ class PAT_OT_Base:
                     armature_object.show_in_front = True
                     armature_object.select_set(True)
                     bpy.ops.object.mode_set(mode='POSE', toggle=False)
-                    # bpy.ops.pose.select_all(action='SELECT')
                     context.view_layer.objects.active = self.mesh_object
                     context.view_layer.objects.active.select_set(True)
                 else:
                     armature_object.show_x_ray = True
                     armature_object.select = True
                     bpy.ops.object.mode_set(mode='POSE', toggle=False)
-                    # bpy.ops.pose.select_all(action='SELECT')
                     context.scene.objects.active = self.mesh_object
                     context.scene.objects.active.select = True
 
@@ -467,8 +465,6 @@ class PAT_OT_Base:
                     modifiers = self.mesh_object.modifiers.new(name='PAT_Armature', type='ARMATURE')
                 modifiers.object = armature_object
 
-                # bpy.ops.object.mode_set(mode='EDIT', toggle=False)
-                # bpy.ops.mesh.select_all(action='SELECT')
                 bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
                 bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
                 bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
