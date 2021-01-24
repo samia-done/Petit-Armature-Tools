@@ -387,19 +387,19 @@ class PAT_OT_Base:
 
         if obj:
             bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-            # TODO:アーマチュアの新規オブジェクトの作成を変更する
             bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
 
             armature_object = context.active_object  # type: bpy.types.Object
+            armature_object.name = 'PAT_Armature'
             armature_object.matrix_world = self.matrix_world
+            armature_object.data.name = 'PAT_Armature'
 
             create_bones = []
             create_bones_append = create_bones.append
             parentBone = None
             normals = mathutils.Vector((0, 0, 0))
             for i, (bone_name, new_bone) in enumerate(zip(self.new_bone_names, self.new_bones)):
-                bone = bpy.context.object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
+                bone = armature_object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
                 bone.head = new_bone['head']
                 bone.tail = new_bone['tail']
 
