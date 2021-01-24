@@ -509,11 +509,12 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         self.new_bone_names = self._get_newbone_names(len(self.new_bones))
 
-        # 作成するボーンと同名の頂点グループがある場合は終了
-        for vg in self.active.vertex_groups:  # type: bpy.types.VertexGroup
-            if vg.name in self.new_bone_names:
-                self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
-                return {'FINISHED'}
+        # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
+        if self.use_auto_bone_weight:
+            for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
+                if vg.name in self.new_bone_names:
+                    self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
+                    return {'FINISHED'}
 
         return self.execute(context)
 
@@ -549,11 +550,12 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
 
         self.new_bone_names = self._get_newbone_names(len(self.new_bones))
 
-        # 作成するボーンと同名の頂点グループがある場合は終了
-        for vg in self.active.vertex_groups:  # type: bpy.types.VertexGroup
-            if vg.name in self.new_bone_names:
-                self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
-                return {'FINISHED'}
+        # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
+        if self.use_auto_bone_weight:
+            for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
+                if vg.name in self.new_bone_names:
+                    self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
+                    return {'FINISHED'}
 
         return self.execute(context)
 
