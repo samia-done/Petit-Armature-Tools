@@ -122,6 +122,7 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         name="Offset",
         description="Bone location offset",
         default=0.0,
+        unit='LENGTH',
         options={'HIDDEN'}
     )
     use_auto_bone_roll = bpy.props.BoolProperty(
