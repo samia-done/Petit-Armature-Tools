@@ -226,7 +226,7 @@ class PAT_OT_Base:
 
     def _get_select_edge_location(self, context):
         bm = bmesh.new()
-        bm = bmesh.from_edit_mesh(self.active.data)
+        bm = bmesh.from_edit_mesh(self.mesh_object.data)
         if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
             bm.verts.ensure_lookup_table()
             bm.edges.ensure_lookup_table()
@@ -265,13 +265,13 @@ class PAT_OT_Base:
 
         for edge in selected_edges:
             edge.select = True
-        self.active.update_from_editmode()
+        self.mesh_object.update_from_editmode()
 
         return new_bones
 
     def _get_select_edge_loops_location(self, context):
         bm = bmesh.new()
-        bm = bmesh.from_edit_mesh(self.active.data)
+        bm = bmesh.from_edit_mesh(self.mesh_object.data)
         if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
             bm.verts.ensure_lookup_table()
             bm.edges.ensure_lookup_table()
@@ -291,7 +291,7 @@ class PAT_OT_Base:
             return
 
         bpy.ops.mesh.select_all(action='DESELECT')
-        self.active.update_from_editmode()
+        self.mesh_object.update_from_editmode()
 
         # ローカルビューが有効になっている場合、一時的に解除
         current_local = False
@@ -311,7 +311,7 @@ class PAT_OT_Base:
         for i, e in enumerate(select_history):
             e.select = True
             bpy.ops.mesh.loop_multi_select(ring=False)
-            self.active.update_from_editmode()
+            self.mesh_object.update_from_editmode()
 
             # すでに選択した辺と同じ辺のときは終了
             if e in selected_edges:
@@ -353,13 +353,13 @@ class PAT_OT_Base:
 
         for edge in selected_edges:
             edge.select = True
-        self.active.update_from_editmode()
+        self.mesh_object.update_from_editmode()
 
         return new_bones
 
     def __init__(self):
         self.pat_tool_settings = None
-        self.active = None
+        self.mesh_object = None
         self.matrix_world = None
         self.new_bones = []
         self.new_bone_names = []
@@ -375,9 +375,9 @@ class PAT_OT_Base:
 
     def invoke(self, context, event):
         self.pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
-        self.active = context.active_object
-        self.active.update_from_editmode()
-        self.matrix_world = self.active.matrix_world
+        self.mesh_object = context.active_object
+        self.mesh_object.update_from_editmode()
+        self.matrix_world = self.mesh_object.matrix_world
 
     def execute(self, context):
         obj = context.object
@@ -413,10 +413,10 @@ class PAT_OT_Base:
 
                 if self.use_auto_bone_weight:
                     try:
-                        vertex_groups = self.active.vertex_groups[bone_name]
+                        vertex_groups = self.mesh_object.vertex_groups[bone_name]
                         self.report({'ERROR'}, "The vertex group " + bone_name + " has already been created")
                     except KeyError:
-                        vertex_groups = self.active.vertex_groups.new(name=bone_name)
+                        vertex_groups = self.mesh_object.vertex_groups.new(name=bone_name)
 
                     vertex_groups.add(new_bone['indexes'], 1.0, 'ADD')
 
@@ -451,20 +451,20 @@ class PAT_OT_Base:
                     armature_object.select_set(True)
                     bpy.ops.object.mode_set(mode='POSE', toggle=False)
                     # bpy.ops.pose.select_all(action='SELECT')
-                    context.view_layer.objects.active = self.active
+                    context.view_layer.objects.active = self.mesh_object
                     context.view_layer.objects.active.select_set(True)
                 else:
                     armature_object.show_x_ray = True
                     armature_object.select = True
                     bpy.ops.object.mode_set(mode='POSE', toggle=False)
                     # bpy.ops.pose.select_all(action='SELECT')
-                    context.scene.objects.active = self.active
+                    context.scene.objects.active = self.mesh_object
                     context.scene.objects.active.select = True
 
                 try:
-                    modifiers = self.active.modifiers['PAT_Armature']
+                    modifiers = self.mesh_object.modifiers['PAT_Armature']
                 except KeyError:
-                    modifiers = self.active.modifiers.new(name='PAT_Armature', type='ARMATURE')
+                    modifiers = self.mesh_object.modifiers.new(name='PAT_Armature', type='ARMATURE')
                 modifiers.object = armature_object
 
                 # bpy.ops.object.mode_set(mode='EDIT', toggle=False)
@@ -500,7 +500,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
         super(PAT_OT_SelectedEdgeOrder, self).invoke(context, event)
 
         # 辺が一つも無い場合は終了
-        if len(self.active.data.edges) < 1:
+        if len(self.mesh_object.data.edges) < 1:
             self.report({'ERROR'}, "This mesh does not have edges")
             return {'FINISHED'}
 
@@ -540,7 +540,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
         super(PAT_OT_MidpointOfSelectedEdgeLoopOder, self).invoke(context, event)
 
         # 辺が2つ以上無い場合は終了
-        if len(self.active.data.edges) < 2:
+        if len(self.mesh_object.data.edges) < 2:
             self.report({'ERROR'}, "This mesh does not have multiple edges")
             return {'FINISHED'}
 
