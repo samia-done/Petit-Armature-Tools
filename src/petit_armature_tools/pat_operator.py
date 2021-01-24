@@ -149,17 +149,17 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         default="Bone"
     )
     bone_name_junction = bpy.props.StringProperty(
-        name="Bone Name Separator",
+        name="Separator",
         description="Bone name separator",
         default="."
     )
     bone_name_prefix = bpy.props.StringProperty(
-        name="Bone Name Prefix",
+        name="Prefix",
         description="Bone name prefix",
         default=""
     )
     bone_name_suffix = bpy.props.StringProperty(
-        name="Bone Name Suffix",
+        name="Suffix",
         description="Bone name suffix",
         default=""
     )
@@ -606,14 +606,15 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         # SelectedEdgeOrder - settings
         if pat_tool_settings.display_edge_oder:
             box = col.column(align=True).box().column()
-            box_split = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
-                                                                                                         align=True)
-            box_split.label(text="Example of Bone Name")
-            box_split.label(text=bone_name)
-            box.prop(pat_tool_settings, "bone_name")
+            row = box.row(align=True)
+            row.label(text="Example of Bone Name")
+            row = row.row(align=True)
+            row.label(text=bone_name)
+            box.separator()
             # box.prop(pat_tool_settings, "target_armature", text="Armature")
             # if pat_tool_settings.target_armature:
             #     box.prop_search(pat_tool_settings, "target_bone", pat_tool_settings.target_armature.data, "bones", text="Bone")
+            box.prop(pat_tool_settings, "bone_name_base")
             box.prop(pat_tool_settings, "bone_name_junction")
             box.prop(pat_tool_settings, "bone_name_prefix")
             box.prop(pat_tool_settings, "bone_name_suffix")
@@ -629,7 +630,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             row = box.row(align=True)
             row.prop(pat_tool_settings, "use_offset")
             row = row.row(align=True)
-            row.prop(pat_tool_settings, "edge_offset")
+            row.prop(pat_tool_settings, "edge_offset", text="")
             row.active = pat_tool_settings.use_offset
 
         split = col.split(percentage=0.15, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.15,
@@ -649,14 +650,15 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         # MidpointOfSelectedEdgeLoopOder - settings
         if pat_tool_settings.display_edge_loop_order:
             box = col.column(align=True).box().column()
-            box_split = box.split(percentage=0.32, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.35,
-                                                                                                         align=True)
-            box_split.label(text="Example of Bone Name")
-            box_split.label(text=bone_name)
-            box.prop(pat_tool_settings, "bone_name")
+            row = box.row(align=True)
+            row.label(text="Example of Bone Name")
+            row = row.row(align=True)
+            row.label(text=bone_name)
+            box.separator()
             # box.prop(pat_tool_settings, "target_armature", text="Armature")
             # if pat_tool_settings.target_armature:
             #     box.prop_search(pat_tool_settings, "target_bone", pat_tool_settings.target_armature.data, "bones", text="Bone")
+            box.prop(pat_tool_settings, "bone_name_base")
             box.prop(pat_tool_settings, "bone_name_junction")
             box.prop(pat_tool_settings, "bone_name_prefix")
             box.prop(pat_tool_settings, "bone_name_suffix")
