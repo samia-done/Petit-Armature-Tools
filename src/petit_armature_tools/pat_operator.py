@@ -127,19 +127,19 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     )
     use_auto_bone_roll = bpy.props.BoolProperty(
         name="Auto Bone Roll",
-        description="Automatically sets the roll value of the bones",
+        description="Enable Auto bone roll",
         default=True,
         options={'HIDDEN'}
     )
     use_auto_bone_weight = bpy.props.BoolProperty(
         name="Auto Bone Weight",
-        description="Automatically sets the bone weights",
+        description="Enable Auto bone weights",
         default=True,
         options={'HIDDEN'}
     )
     use_offset = bpy.props.BoolProperty(
         name="Offset",
-        description="Bone location offset",
+        description="Enable Bone location offset",
         default=False,
         options={'HIDDEN'}
     )
