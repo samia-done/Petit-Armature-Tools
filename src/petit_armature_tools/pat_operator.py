@@ -62,8 +62,50 @@ def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, 
     return bone_name
 
 
+# def target_armature_poll(self, context):
+#     """
+#
+#     :param self:
+#     :type self:
+#     :param context:
+#     :type context: bpy_types.Object
+#     :return:
+#     :rtype:
+#     """
+#     print("poll:",type(self))
+#     print("poll:",type(context))
+#     return context.type == 'ARMATURE' and context.is_visible(bpy.context.scene) if bpy.app.version < (2, 80)\
+#         else context.type == 'ARMATURE' and context.visible_get()
+#
+#
+# def target_armature_update(self, context):
+#     """
+#
+#     :param self:
+#     :type self:
+#     :param context:
+#     :type context:
+#     """
+#     print("update:",type(self))
+#     print("update:",type(context))
+#     self.target_bone = ''
+
+
 @make_annotations
 class PAT_ToolSettings(bpy.types.PropertyGroup):
+    # target_armature = bpy.props.PointerProperty(
+    #     name="Target Armature",
+    #     description="",
+    #     type=bpy.types.Object,
+    #     poll=target_armature_poll,
+    #     update=target_armature_update,
+    #     options={'HIDDEN'}
+    # )
+    # target_bone = bpy.props.StringProperty(
+    #     name="Target Bone",
+    #     description="",
+    #     options={'HIDDEN'}
+    # )
     display_edge_oder = bpy.props.BoolProperty(
         name="Selected Edge Loop Oder Settings",
         description="Display Settings of the Selected Edge Loop Oder",
@@ -430,6 +472,17 @@ class PAT_OT_Base:
                 bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
                 bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
+            # if self.pat_tool_settings.target_armature:
+            #     # print(pat_tool_settings.target_armature)
+            #     if hasattr(context, "view_layer"):
+            #         context.view_layer.objects.active = self.pat_tool_settings.target_armature
+            #         context.view_layer.objects.active.select_set(True)
+            #     else:
+            #         context.scene.objects.active = self.pat_tool_settings.target_armature
+            #         context.scene.objects.active.select = True
+            #     bpy.ops.object.join()
+            #     self.active.modifiers["Armature"].object = self.pat_tool_settings.target_armature
+            #     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
 
 @make_annotations
@@ -559,6 +612,9 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             box_split.label(text="Example of Bone Name")
             box_split.label(text=bone_name)
             box.prop(pat_tool_settings, "bone_name")
+            # box.prop(pat_tool_settings, "target_armature", text="Armature")
+            # if pat_tool_settings.target_armature:
+            #     box.prop_search(pat_tool_settings, "target_bone", pat_tool_settings.target_armature.data, "bones", text="Bone")
             box.prop(pat_tool_settings, "bone_name_junction")
             box.prop(pat_tool_settings, "bone_name_prefix")
             box.prop(pat_tool_settings, "bone_name_suffix")
@@ -599,6 +655,9 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             box_split.label(text="Example of Bone Name")
             box_split.label(text=bone_name)
             box.prop(pat_tool_settings, "bone_name")
+            # box.prop(pat_tool_settings, "target_armature", text="Armature")
+            # if pat_tool_settings.target_armature:
+            #     box.prop_search(pat_tool_settings, "target_bone", pat_tool_settings.target_armature.data, "bones", text="Bone")
             box.prop(pat_tool_settings, "bone_name_junction")
             box.prop(pat_tool_settings, "bone_name_prefix")
             box.prop(pat_tool_settings, "bone_name_suffix")
