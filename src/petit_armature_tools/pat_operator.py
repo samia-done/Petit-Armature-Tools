@@ -143,9 +143,9 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         default=False,
         options={'HIDDEN'}
     )
-    bone_name = bpy.props.StringProperty(
-        name="Bone Name",
-        description="Bone name",
+    bone_name_base = bpy.props.StringProperty(
+        name="Base Name",
+        description="Base Name",
         default="Bone"
     )
     bone_name_junction = bpy.props.StringProperty(
@@ -220,7 +220,7 @@ class PAT_OT_Base:
         return distance
 
     def _get_newbone_names(self, length):
-        return [create_name(self.pat_tool_settings.bone_name, self.pat_tool_settings.bone_name_junction,
+        return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
             self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
             self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding) for i in range(length)]
 
@@ -602,7 +602,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = pat_tool_settings.use_offset
 
-        bone_name = create_name(pat_tool_settings.bone_name, pat_tool_settings.bone_name_junction,
+        bone_name = create_name(pat_tool_settings.bone_name_base, pat_tool_settings.bone_name_junction,
                                 pat_tool_settings.bone_name_prefix, pat_tool_settings.bone_name_suffix,
                                 pat_tool_settings.start_number, 0, pat_tool_settings.zero_padding)
         # SelectedEdgeOrder - settings
