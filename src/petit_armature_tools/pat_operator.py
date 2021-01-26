@@ -207,6 +207,13 @@ class PAT_OT_Base:
         default=False,
         options={'HIDDEN'}
     )
+    offset = bpy.props.FloatProperty(
+        name="Offset",
+        description="Bone location offset",
+        default=0.0,
+        unit='LENGTH',
+        options={'HIDDEN'}
+    )
     use_auto_bone_roll = bpy.props.BoolProperty(
         name="Auto Bone Roll",
         description="Enable Auto bone roll",
@@ -216,6 +223,18 @@ class PAT_OT_Base:
     use_auto_bone_weight = bpy.props.BoolProperty(
         name="Auto Bone Weight",
         description="Enable Auto bone weights",
+        default=True,
+        options={'HIDDEN'}
+    )
+    is_parent = bpy.props.BoolProperty(
+        name="Parent",
+        description="Set parent bone",
+        default=True,
+        options={'HIDDEN'}
+    )
+    use_connect = bpy.props.BoolProperty(
+        name="Connected",
+        description="When Bone has a parent,bone's head is stuck tp the parent's tail",
         default=True,
         options={'HIDDEN'}
     )
@@ -292,10 +311,10 @@ class PAT_OT_Base:
                 if self.use_offset:
                     normals += new_bone['normal']
 
-                if self.pat_tool_settings.is_parent:
+                if self.is_parent:
                     if parentBone:
                         bone.parent = parentBone
-                        bone.use_connect = self.pat_tool_settings.use_connect
+                        bone.use_connect = self.use_connect
                     parentBone = bone
 
             for bone in create_bones:
@@ -303,7 +322,7 @@ class PAT_OT_Base:
 
             if self.use_offset:
                 normal = (normals / len(self.new_bones)).normalized()
-                normal = normal * self.pat_tool_settings.edge_offset
+                normal = normal * self.offset
                 for bone in create_bones:
                     if bone.use_connect:
                         bone.tail += normal
@@ -628,6 +647,9 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op.use_auto_bone_roll = pat_tool_settings.use_auto_bone_roll
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = pat_tool_settings.use_offset
+        op.offset = pat_tool_settings.edge_offset
+        op.is_parent = pat_tool_settings.is_parent
+        op.use_connect = pat_tool_settings.use_connect
 
         bone_name = create_name(pat_tool_settings.bone_name_base, pat_tool_settings.bone_name_junction,
                                 pat_tool_settings.bone_name_prefix, pat_tool_settings.bone_name_suffix,
@@ -675,6 +697,9 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op.use_auto_bone_roll = False
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = False
+        op.offset = 0.0
+        op.is_parent = pat_tool_settings.is_parent
+        op.use_connect = pat_tool_settings.use_connect
 
         # MidpointOfSelectedEdgeLoopOder - settings
         if pat_tool_settings.display_edge_loop_order:
