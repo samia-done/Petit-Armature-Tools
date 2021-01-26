@@ -57,9 +57,7 @@ def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, 
     if suffix:
         bone_name_suffix = separator + suffix
 
-    bone_name = bone_name_prefix + str(start_number + count).rjust(zero_padding, '0') + bone_name_suffix
-
-    return bone_name
+    return bone_name_prefix + str(start_number + count).rjust(zero_padding, '0') + bone_name_suffix
 
 
 # def target_armature_poll(self, context):
