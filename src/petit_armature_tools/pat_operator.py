@@ -106,13 +106,13 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     # )
     display_edge_oder = bpy.props.BoolProperty(
         name="Selected Edge Loop Oder Settings",
-        description="Display Settings of the Selected Edge Loop Oder",
+        description="Display Settings of Selected Edge Oder",
         default=True,
         options={'HIDDEN'}
     )
     display_edge_loop_order = bpy.props.BoolProperty(
-        name="Midpoint of selected Edge Loop Oder Settings",
-        description="Display Settings of Midpoint of selected Edge Loop Oder",
+        name="Midpoint of Selected Edge Loop Oder Settings",
+        description="Display Settings of Selected Edge Loop Oder",
         default=True,
         options={'HIDDEN'}
     )
@@ -194,19 +194,19 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
 class PAT_OT_Base:
     use_offset = bpy.props.BoolProperty(
         name="Offset",
-        description="Bone location offset",
+        description="Enable Bone location offset",
         default=False,
         options={'HIDDEN'}
     )
     use_auto_bone_roll = bpy.props.BoolProperty(
         name="Auto Bone Roll",
-        description="Automatically sets the roll value of the bones",
+        description="Enable Auto bone roll",
         default=True,
         options={'HIDDEN'}
     )
     use_auto_bone_weight = bpy.props.BoolProperty(
         name="Auto Bone Weight",
-        description="Automatically sets the bone weights",
+        description="Enable Auto bone weights",
         default=True,
         options={'HIDDEN'}
     )
