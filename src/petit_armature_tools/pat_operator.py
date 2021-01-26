@@ -219,56 +219,6 @@ class PAT_OT_Base:
                              (vector0[2] - vector1[2]) ** 2)
         return distance
 
-    def _get_newbone_names(self, length):
-        return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
-            self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
-            self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding) for i in range(length)]
-
-    def _get_select_edge_location(self, context):
-        bm = bmesh.new()
-        bm = bmesh.from_edit_mesh(self.mesh_object.data)
-        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
-            bm.verts.ensure_lookup_table()
-            bm.edges.ensure_lookup_table()
-            bm.faces.ensure_lookup_table()
-
-        selected_edges = []
-        new_bones = []
-        head = None
-        tail = None
-
-        for i, e in enumerate(bm.select_history):  # type: (int, bmesh.types.BMEdge)
-            if isinstance(e, bmesh.types.BMEdge) and e.select:
-                selected_edges.append(e)
-                v0 = e.verts[0]
-                v1 = e.verts[1]
-                if head:
-                    if self._get_distance(head.co, v0.co) > self._get_distance(head.co, v1.co):
-                        v0, v1 = v1, v0
-                    if not self.pat_tool_settings.use_connect:
-                        head = v0
-                    tail = v1
-                else:
-                    if len(bm.select_history) > 2:
-                        v2 = bm.select_history[i + 1].verts[0]
-                        v3 = bm.select_history[i + 1].verts[1]
-
-                        if self._get_distance(v0.co, v2.co) < self._get_distance(v1.co, v2.co):
-                            v0, v1 = v1, v0
-                    head = v0
-                    tail = v1
-
-                normal = (head.normal + tail.normal) / 2
-                new_bones.append({"indexes": (copy.copy(head.index), copy.copy(tail.index)), "head": copy.copy(head.co),
-                                  "tail": copy.copy(tail.co), "normal": copy.copy(normal.normalized())})
-                head = tail
-
-        for edge in selected_edges:
-            edge.select = True
-        self.mesh_object.update_from_editmode()
-
-        return new_bones
-
     def _get_select_edge_loops_location(self, context):
         bm = bmesh.new()
         bm = bmesh.from_edit_mesh(self.mesh_object.data)
@@ -489,6 +439,64 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
     bl_description = "Creates bones from selected edge order"
     bl_options = {'REGISTER', 'UNDO'}
 
+    def _get_new_bones(self, context):
+        return self._get_select_edge_location(context)
+
+    def _get_new_bone_names(self):
+        length = len(self.new_bones)
+        if length > 0:
+            return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
+                                self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
+                                self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding)
+                    for i in range(length)]
+        else:
+            return ['']
+
+    def _get_select_edge_location(self, context):
+        bm = bmesh.new()
+        bm = bmesh.from_edit_mesh(self.mesh_object.data)
+        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
+
+        selected_edges = []
+        new_bones = []
+        head = None
+        tail = None
+
+        for i, e in enumerate(bm.select_history):  # type: (int, bmesh.types.BMEdge)
+            if isinstance(e, bmesh.types.BMEdge) and e.select:
+                selected_edges.append(e)
+                v0 = e.verts[0]
+                v1 = e.verts[1]
+                if head:
+                    if self._get_distance(head.co, v0.co) > self._get_distance(head.co, v1.co):
+                        v0, v1 = v1, v0
+                    if not self.use_connect:
+                        head = v0
+                    tail = v1
+                else:
+                    if len(bm.select_history) > 2:
+                        v2 = bm.select_history[i + 1].verts[0]
+                        v3 = bm.select_history[i + 1].verts[1]
+
+                        if self._get_distance(v0.co, v2.co) < self._get_distance(v1.co, v2.co):
+                            v0, v1 = v1, v0
+                    head = v0
+                    tail = v1
+
+                normal = (head.normal + tail.normal) / 2
+                new_bones.append({"indexes": (copy.copy(head.index), copy.copy(tail.index)), "head": copy.copy(head.co),
+                                  "tail": copy.copy(tail.co), "normal": copy.copy(normal.normalized())})
+                head = tail
+
+        for edge in selected_edges:
+            edge.select = True
+        self.mesh_object.update_from_editmode()
+
+        return new_bones
+
     def __init__(self):
         super(PAT_OT_SelectedEdgeOrder, self).__init__()
 
@@ -500,14 +508,14 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
             self.report({'ERROR'}, "This mesh does not have edges")
             return {'FINISHED'}
 
-        self.new_bones = self._get_select_edge_location(context)
+        self.new_bones = self._get_new_bones(context)
 
         # 作成するボーンデータが一つも無い場合は終了
         if not self.new_bones:
             self.report({'ERROR'}, "Select at least one edge")
             return {'FINISHED'}
 
-        self.new_bone_names = self._get_newbone_names(len(self.new_bones))
+        self.new_bone_names = self._get_new_bone_names()
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
