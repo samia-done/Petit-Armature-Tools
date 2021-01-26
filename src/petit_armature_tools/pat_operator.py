@@ -144,49 +144,58 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     bone_name_base = bpy.props.StringProperty(
         name="Base Name",
         description="Base Name",
-        default="Bone"
+        default="Bone",
+        options={'HIDDEN'}
     )
     bone_name_junction = bpy.props.StringProperty(
         name="Separator",
         description="Bone name separator",
-        default="."
+        default=".",
+        options={'HIDDEN'}
     )
     bone_name_prefix = bpy.props.StringProperty(
         name="Prefix",
         description="Bone name prefix",
-        default=""
+        default="",
+        options={'HIDDEN'}
     )
     bone_name_suffix = bpy.props.StringProperty(
         name="Suffix",
         description="Bone name suffix",
-        default=""
+        default="",
+        options={'HIDDEN'}
     )
     start_number = bpy.props.IntProperty(
         name="Start Number",
         description="Starting number of bone name",
         default=1,
         min=0,
+        options={'HIDDEN'}
     )
     zero_padding = bpy.props.IntProperty(
         name="Zero-padding",
         description="Zero-padding of digits in bone names",
         default=3,
         min=1,
+        options={'HIDDEN'}
     )
     # is_reverse = bpy.props.BoolProperty(
     #     name="Reverse",
     #     description="Change the bone order to the reverse order",
-    #     default=False
+    #     default=False,
+    #     options={'HIDDEN'}
     # )
     is_parent = bpy.props.BoolProperty(
         name="Parent",
         description="Set parent bone",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
     use_connect = bpy.props.BoolProperty(
         name="Connected",
         description="When Bone has a parent,bone's head is stuck tp the parent's tail",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
 
