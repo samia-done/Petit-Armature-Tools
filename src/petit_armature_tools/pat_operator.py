@@ -107,18 +107,18 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     display_edge_oder = bpy.props.BoolProperty(
         name="Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Oder",
-        default=True,
+        default=False,
         options={'HIDDEN'}
     )
     display_edge_loop_order = bpy.props.BoolProperty(
         name="Midpoint of Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Loop Oder",
-        default=True,
+        default=False,
         options={'HIDDEN'}
     )
     edge_offset = bpy.props.FloatProperty(
         name="Offset",
-        description="Bone location offset",
+        description="Offset value",
         default=0.0,
         unit='LENGTH',
         options={'HIDDEN'}
@@ -143,7 +143,7 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     )
     bone_name_base = bpy.props.StringProperty(
         name="Base Name",
-        description="Base Name",
+        description="Base of bone name",
         default="Bone",
         options={'HIDDEN'}
     )
@@ -187,13 +187,13 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     # )
     is_parent = bpy.props.BoolProperty(
         name="Parent",
-        description="Set parent bone",
+        description="Set the previously created bone as the parent",
         default=True,
         options={'HIDDEN'}
     )
     use_connect = bpy.props.BoolProperty(
         name="Connected",
-        description="When Bone has a parent,bone's head is stuck tp the parent's tail",
+        description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
         options={'HIDDEN'}
     )
@@ -209,7 +209,7 @@ class PAT_OT_Base:
     )
     offset = bpy.props.FloatProperty(
         name="Offset",
-        description="Bone location offset",
+        description="Offset value",
         default=0.0,
         unit='LENGTH',
         options={'HIDDEN'}
@@ -228,13 +228,13 @@ class PAT_OT_Base:
     )
     is_parent = bpy.props.BoolProperty(
         name="Parent",
-        description="Set parent bone",
+        description="Set the previously created bone as the parent",
         default=True,
         options={'HIDDEN'}
     )
     use_connect = bpy.props.BoolProperty(
         name="Connected",
-        description="When Bone has a parent,bone's head is stuck tp the parent's tail",
+        description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
         options={'HIDDEN'}
     )
@@ -663,7 +663,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         if pat_tool_settings.display_edge_oder:
             box = col.column(align=True).box().column()
             row = box.row(align=True)
-            row.label(text="Example of Bone Name")
+            row.label(text="Example of name display:")
             row = row.row(align=True)
             row.label(text=bone_name)
             box.separator()
@@ -710,7 +710,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         if pat_tool_settings.display_edge_loop_order:
             box = col.column(align=True).box().column()
             row = box.row(align=True)
-            row.label(text="Example of Bone Name")
+            row.label(text="Example of name display:")
             row = row.row(align=True)
             row.label(text=bone_name)
             box.separator()
