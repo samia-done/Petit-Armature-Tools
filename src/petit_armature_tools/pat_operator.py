@@ -455,6 +455,12 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         self.new_bone_names = self._get_new_bone_names()
 
+        # ボーンネームが空の場合は終了
+        for bone_name in self.new_bone_names:
+            if bone_name == '':
+                self.report({'ERROR'}, "No blank names are allowed")
+                return {'FINISHED'}
+
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
             for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
@@ -597,6 +603,11 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
 
         self.new_bone_names = self._get_new_bone_names()
 
+        # ボーンネームが空の場合は終了
+        for bone_name in self.new_bone_names:
+            if bone_name == '':
+                self.report({'ERROR'}, "No blank names are allowed")
+                return {'FINISHED'}
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
