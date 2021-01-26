@@ -268,106 +268,100 @@ class PAT_OT_Base:
         self.matrix_world = self.mesh_object.matrix_world
 
     def execute(self, context):
-        obj = context.object
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+        bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
 
-        if obj.type != 'MESH':
-            raise TypeError("Active object is not a Mesh.")
+        armature_object = context.active_object  # type: bpy.types.Object
+        armature_object.name = 'PAT_Armature'
+        armature_object.matrix_world = self.matrix_world
+        armature_object.data.name = 'PAT_Armature'
 
-        if obj:
-            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-            bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
+        create_bones = []
+        create_bones_append = create_bones.append
+        parentBone = None
+        normals = mathutils.Vector((0, 0, 0))
+        for i, (bone_name, new_bone) in enumerate(zip(self.new_bone_names, self.new_bones)):
+            bone = armature_object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
+            bone.head = new_bone['head']
+            bone.tail = new_bone['tail']
 
-            armature_object = context.active_object  # type: bpy.types.Object
-            armature_object.name = 'PAT_Armature'
-            armature_object.matrix_world = self.matrix_world
-            armature_object.data.name = 'PAT_Armature'
+            if self.use_auto_bone_roll:
+                bone.align_roll(new_bone['normal'])
+                bone.roll = math.radians(round(math.degrees(bone.roll), 0))
+            else:
+                bone.roll = 0.0
 
-            create_bones = []
-            create_bones_append = create_bones.append
-            parentBone = None
-            normals = mathutils.Vector((0, 0, 0))
-            for i, (bone_name, new_bone) in enumerate(zip(self.new_bone_names, self.new_bones)):
-                bone = armature_object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
-                bone.head = new_bone['head']
-                bone.tail = new_bone['tail']
-
-                if self.use_auto_bone_roll:
-                    bone.align_roll(new_bone['normal'])
-                    bone.roll = math.radians(round(math.degrees(bone.roll), 0))
-                else:
-                    bone.roll = 0.0
-
-                create_bones_append(bone)
-
-                if self.use_auto_bone_weight:
-                    try:
-                        vertex_groups = self.mesh_object.vertex_groups[bone_name]
-                        self.report({'ERROR'}, "The vertex group " + bone_name + " has already been created")
-                    except KeyError:
-                        vertex_groups = self.mesh_object.vertex_groups.new(name=bone_name)
-
-                    vertex_groups.add(new_bone['indexes'], 1.0, 'ADD')
-
-                if self.use_offset:
-                    normals += new_bone['normal']
-
-                if self.is_parent:
-                    if parentBone:
-                        bone.parent = parentBone
-                        bone.use_connect = self.use_connect
-                    parentBone = bone
-
-            for bone in create_bones:
-                bone.select = True
-
-            if self.use_offset:
-                normal = (normals / len(self.new_bones)).normalized()
-                normal = normal * self.offset
-                for bone in create_bones:
-                    if bone.use_connect:
-                        bone.tail += normal
-                    else:
-                        bone.translate(normal)
-
-            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
-            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            create_bones_append(bone)
 
             if self.use_auto_bone_weight:
-                if hasattr(context, "view_layer"):
-                    armature_object.show_in_front = True
-                    armature_object.select_set(True)
-                    bpy.ops.object.mode_set(mode='POSE', toggle=False)
-                    context.view_layer.objects.active = self.mesh_object
-                    context.view_layer.objects.active.select_set(True)
-                else:
-                    armature_object.show_x_ray = True
-                    armature_object.select = True
-                    bpy.ops.object.mode_set(mode='POSE', toggle=False)
-                    context.scene.objects.active = self.mesh_object
-                    context.scene.objects.active.select = True
-
                 try:
-                    modifiers = self.mesh_object.modifiers['PAT_Armature']
+                    vertex_groups = self.mesh_object.vertex_groups[bone_name]
+                    self.report({'ERROR'}, "The vertex group " + bone_name + " has already been created")
                 except KeyError:
-                    modifiers = self.mesh_object.modifiers.new(name='PAT_Armature', type='ARMATURE')
-                modifiers.object = armature_object
+                    vertex_groups = self.mesh_object.vertex_groups.new(name=bone_name)
 
-                bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
-                bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
-                bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+                vertex_groups.add(new_bone['indexes'], 1.0, 'ADD')
 
-            # if self.pat_tool_settings.target_armature:
-            #     # print(pat_tool_settings.target_armature)
-            #     if hasattr(context, "view_layer"):
-            #         context.view_layer.objects.active = self.pat_tool_settings.target_armature
-            #         context.view_layer.objects.active.select_set(True)
-            #     else:
-            #         context.scene.objects.active = self.pat_tool_settings.target_armature
-            #         context.scene.objects.active.select = True
-            #     bpy.ops.object.join()
-            #     self.active.modifiers["Armature"].object = self.pat_tool_settings.target_armature
-            #     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+            if self.use_offset:
+                normals += new_bone['normal']
+
+            if self.is_parent:
+                if parentBone:
+                    bone.parent = parentBone
+                    bone.use_connect = self.use_connect
+                parentBone = bone
+
+        for bone in create_bones:
+            bone.select = True
+
+        if self.use_offset:
+            normal = (normals / len(self.new_bones)).normalized()
+            normal = normal * self.offset
+            for bone in create_bones:
+                if bone.use_connect:
+                    bone.tail += normal
+                else:
+                    bone.translate(normal)
+
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        if self.use_auto_bone_weight:
+            if hasattr(context, "view_layer"):
+                armature_object.show_in_front = True
+                armature_object.select_set(True)
+                bpy.ops.object.mode_set(mode='POSE', toggle=False)
+                context.view_layer.objects.active = self.mesh_object
+                context.view_layer.objects.active.select_set(True)
+            else:
+                armature_object.show_x_ray = True
+                armature_object.select = True
+                bpy.ops.object.mode_set(mode='POSE', toggle=False)
+                context.scene.objects.active = self.mesh_object
+                context.scene.objects.active.select = True
+
+            try:
+                modifiers = self.mesh_object.modifiers['PAT_Armature']
+            except KeyError:
+                modifiers = self.mesh_object.modifiers.new(name='PAT_Armature', type='ARMATURE')
+            modifiers.object = armature_object
+
+            bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
+            bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
+            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        # if self.pat_tool_settings.target_armature:
+        #     # print(pat_tool_settings.target_armature)
+        #     if hasattr(context, "view_layer"):
+        #         context.view_layer.objects.active = self.pat_tool_settings.target_armature
+        #         context.view_layer.objects.active.select_set(True)
+        #     else:
+        #         context.scene.objects.active = self.pat_tool_settings.target_armature
+        #         context.scene.objects.active.select = True
+        #     bpy.ops.object.join()
+        #     self.active.modifiers["Armature"].object = self.pat_tool_settings.target_armature
+        #     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
 
 @make_annotations
