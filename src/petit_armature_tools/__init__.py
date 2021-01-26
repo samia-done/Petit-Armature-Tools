@@ -82,11 +82,11 @@ def register():
     bpy.types.Scene.PAT_ToolSettings = bpy.props.PointerProperty(type=pat_operator.PAT_ToolSettings)
     pat_preferences.update_panel(None, bpy.context)
 
-    # bpy.app.translations.register(__name__, get_translation_dict())
+    bpy.app.translations.register(__name__, get_translation_dict())
 
 
 def unregister():
-    # bpy.app.translations.unregister(__name__)
+    bpy.app.translations.unregister(__name__)
 
     del bpy.types.Scene.PAT_ToolSettings
     for cls in reversed(classes):
