@@ -219,94 +219,6 @@ class PAT_OT_Base:
                              (vector0[2] - vector1[2]) ** 2)
         return distance
 
-    def _get_select_edge_loops_location(self, context):
-        bm = bmesh.new()
-        bm = bmesh.from_edit_mesh(self.mesh_object.data)
-        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
-            bm.verts.ensure_lookup_table()
-            bm.edges.ensure_lookup_table()
-            bm.faces.ensure_lookup_table()
-
-        current_cursor = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
-            else copy.copy(context.scene.cursor.location)
-
-        select_history = []
-        select_history_append = select_history.append
-        for history_edge in bm.select_history:
-            if isinstance(history_edge, bmesh.types.BMEdge):
-                select_history_append(history_edge)
-
-        # 選択した辺が2つ以上無い場合は終了
-        if len(select_history) < 2:
-            return
-
-        bpy.ops.mesh.select_all(action='DESELECT')
-        self.mesh_object.update_from_editmode()
-
-        # ローカルビューが有効になっている場合、一時的に解除
-        current_local = False
-        if context.space_data.local_view:
-            # Disable local view
-            bpy.ops.view3d.localview()
-            current_local = True
-
-        selected_edges = []
-        new_bones = []
-        head = None
-        tail = None
-        head_indexes = []
-        tail_indexes = []
-
-        mwi = self.matrix_world.inverted()
-        for i, e in enumerate(select_history):
-            e.select = True
-            bpy.ops.mesh.loop_multi_select(ring=False)
-            self.mesh_object.update_from_editmode()
-
-            # すでに選択した辺と同じ辺のときは終了
-            if e in selected_edges:
-                return
-
-            select_loop_edges = [s_e for s_e in bm.edges if s_e.select == True]
-            selected_edges += select_loop_edges
-
-            if i > 0:
-                tail_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
-
-                bpy.ops.view3d.snap_cursor_to_selected()
-                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
-                    else mwi @ context.scene.cursor.location
-
-                tail = copy.copy(local_cursor_location)
-
-                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail})
-                head = tail
-                head_indexes = tail_indexes
-            else:
-                head_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
-
-                bpy.ops.view3d.snap_cursor_to_selected()
-                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
-                    else mwi @ context.scene.cursor.location
-
-                head = copy.copy(local_cursor_location)
-
-            bpy.ops.mesh.select_all(action='DESELECT')
-
-        if current_local:
-            bpy.ops.view3d.localview()
-
-        if bpy.app.version < (2, 80):
-            context.scene.cursor_location = current_cursor
-        else:
-            context.scene.cursor.location = current_cursor
-
-        for edge in selected_edges:
-            edge.select = True
-        self.mesh_object.update_from_editmode()
-
-        return new_bones
-
     def __init__(self):
         self.pat_tool_settings = None
         self.mesh_object = None
@@ -538,6 +450,107 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
     bl_description = "Creates bones at the midpoint of selected edge loop order"
     bl_options = {'REGISTER', 'UNDO'}
 
+    def _get_new_bones(self, context):
+        return self._get_select_edge_loops_location(context)
+
+    def _get_new_bone_names(self):
+        length = len(self.new_bones)
+        if length > 0:
+            return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
+                                self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
+                                self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding)
+                    for i in range(length)]
+        else:
+            return ['']
+
+    def _get_select_edge_loops_location(self, context):
+        bm = bmesh.new()
+        bm = bmesh.from_edit_mesh(self.mesh_object.data)
+        if bpy.app.version[0] >= 2 and bpy.app.version[1] >= 73:
+            bm.verts.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            bm.faces.ensure_lookup_table()
+
+        current_cursor = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
+            else copy.copy(context.scene.cursor.location)
+
+        select_history = []
+        select_history_append = select_history.append
+        for history_edge in bm.select_history:
+            if isinstance(history_edge, bmesh.types.BMEdge):
+                select_history_append(history_edge)
+
+        # 選択した辺が2つ以上無い場合は終了
+        if len(select_history) < 2:
+            return
+
+        bpy.ops.mesh.select_all(action='DESELECT')
+        self.mesh_object.update_from_editmode()
+
+        # ローカルビューが有効になっている場合、一時的に解除
+        current_local = False
+        if context.space_data.local_view:
+            # Disable local view
+            bpy.ops.view3d.localview()
+            current_local = True
+
+        selected_edges = []
+        new_bones = []
+        head = None
+        tail = None
+        head_indexes = []
+        tail_indexes = []
+
+        mwi = self.matrix_world.inverted()
+        for i, e in enumerate(select_history):
+            e.select = True
+            bpy.ops.mesh.loop_multi_select(ring=False)
+            self.mesh_object.update_from_editmode()
+
+            # すでに選択した辺と同じ辺のときは終了
+            if e in selected_edges:
+                return
+
+            select_loop_edges = [s_e for s_e in bm.edges if s_e.select == True]
+            selected_edges += select_loop_edges
+
+            if i > 0:
+                tail_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
+
+                bpy.ops.view3d.snap_cursor_to_selected()
+                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                    else mwi @ context.scene.cursor.location
+
+                tail = copy.copy(local_cursor_location)
+
+                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail})
+                head = tail
+                head_indexes = tail_indexes
+            else:
+                head_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
+
+                bpy.ops.view3d.snap_cursor_to_selected()
+                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                    else mwi @ context.scene.cursor.location
+
+                head = copy.copy(local_cursor_location)
+
+            bpy.ops.mesh.select_all(action='DESELECT')
+
+        if current_local:
+            bpy.ops.view3d.localview()
+
+        if bpy.app.version < (2, 80):
+            context.scene.cursor_location = current_cursor
+        else:
+            context.scene.cursor.location = current_cursor
+
+        for edge in selected_edges:
+            edge.select = True
+        self.mesh_object.update_from_editmode()
+
+        return new_bones
+
     def __init__(self):
         super(PAT_OT_MidpointOfSelectedEdgeLoopOder, self).__init__()
 
@@ -549,14 +562,15 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             self.report({'ERROR'}, "This mesh does not have multiple edges")
             return {'FINISHED'}
 
-        self.new_bones = self._get_select_edge_loops_location(context)
+        self.new_bones = self._get_new_bones(context)
 
         # 作成するボーンデータが一つも無い場合は終了
         if not self.new_bones:
             self.report({'ERROR'}, "Select at least two edge loops")
             return {'FINISHED'}
 
-        self.new_bone_names = self._get_newbone_names(len(self.new_bones))
+        self.new_bone_names = self._get_new_bone_names()
+
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
