@@ -459,7 +459,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
         if self.use_auto_bone_weight:
             for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
                 if vg.name in self.new_bone_names:
-                    self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
+                    self.report({'ERROR'}, "The vertex group has already been created")
                     return {'FINISHED'}
 
         return self.execute(context)
@@ -607,7 +607,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
         if self.use_auto_bone_weight:
             for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
                 if vg.name in self.new_bone_names:
-                    self.report({'ERROR'}, "The vertex group " + vg.name + " has already been created")
+                    self.report({'ERROR'}, "The vertex group has already been created")
                     return {'FINISHED'}
 
         return self.execute(context)
