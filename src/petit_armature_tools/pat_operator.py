@@ -413,7 +413,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
                         head = v0
                     tail = v1
                 else:
-                    if len(bm.select_history) > 2:
+                    if len(bm.select_history) > 1:
                         v2 = bm.select_history[i + 1].verts[0]
                         v3 = bm.select_history[i + 1].verts[1]
 
