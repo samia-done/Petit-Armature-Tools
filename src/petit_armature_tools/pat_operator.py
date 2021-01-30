@@ -288,8 +288,6 @@ class PAT_OT_Base:
             if self.use_auto_bone_roll:
                 bone.align_roll(new_bone['normal'])
                 bone.roll = math.radians(round(math.degrees(bone.roll), 0))
-            else:
-                bone.roll = 0.0
 
             create_bones_append(bone)
 
@@ -326,6 +324,10 @@ class PAT_OT_Base:
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+
+        if not self.use_auto_bone_roll:
+            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            bpy.ops.armature.roll_clear(roll=0)
 
         if self.use_auto_bone_weight:
             if hasattr(context, "view_layer"):
