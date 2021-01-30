@@ -296,7 +296,7 @@ class PAT_OT_Base:
             if self.use_auto_bone_weight:
                 try:
                     vertex_groups = self.mesh_object.vertex_groups[bone_name]
-                    self.report({'ERROR'}, "The vertex group " + bone_name + " has already been created")
+                    self.report({'ERROR'}, "The vertex group has already been created")
                 except KeyError:
                     vertex_groups = self.mesh_object.vertex_groups.new(name=bone_name)
 
