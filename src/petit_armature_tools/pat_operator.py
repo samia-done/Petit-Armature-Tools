@@ -322,7 +322,6 @@ class PAT_OT_Base:
                     bone.translate(normal)
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
         if not self.use_auto_bone_roll:
@@ -330,16 +329,13 @@ class PAT_OT_Base:
             bpy.ops.armature.roll_clear(roll=0)
 
         if self.use_auto_bone_weight:
+            bpy.ops.object.mode_set(mode='POSE', toggle=False)
             if hasattr(context, "view_layer"):
-                armature_object.show_in_front = True
                 armature_object.select_set(True)
-                bpy.ops.object.mode_set(mode='POSE', toggle=False)
                 context.view_layer.objects.active = self.mesh_object
                 context.view_layer.objects.active.select_set(True)
             else:
-                armature_object.show_x_ray = True
                 armature_object.select = True
-                bpy.ops.object.mode_set(mode='POSE', toggle=False)
                 context.scene.objects.active = self.mesh_object
                 context.scene.objects.active.select = True
 
@@ -351,7 +347,6 @@ class PAT_OT_Base:
 
             bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
             bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
-            bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
         # if self.pat_tool_settings.target_armature:
         #     # print(pat_tool_settings.target_armature)
@@ -364,6 +359,13 @@ class PAT_OT_Base:
         #     bpy.ops.object.join()
         #     self.active.modifiers["Armature"].object = self.pat_tool_settings.target_armature
         #     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+
+        if bpy.app.version < (2, 80):
+            armature_object.show_x_ray = True
+        else:
+            armature_object.show_in_front = True
 
 
 @make_annotations
