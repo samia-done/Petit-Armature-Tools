@@ -362,6 +362,7 @@ class PAT_OT_Base:
 
         bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
+        armature_object.data.show_names = True
         if bpy.app.version < (2, 80):
             armature_object.show_x_ray = True
         else:
