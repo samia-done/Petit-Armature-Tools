@@ -11,6 +11,8 @@
 "自動でボーンロールを設定する機能を有効にします","Enable Auto bone roll"
 "自動ウェイト","Auto Bone Weight"
 "自動でウェイトを設定する機能を有効にします","Enable Auto bone weights"
+"自動インクリメント","Auto Increment"
+"開始番号の自動インクリメントを有効にします","Enable auto increment of start number"
 "オフセット","Offset"
 "オフセット値","Offset value"
 "ボーンを作成するとき、位置のオフセットを有効にします","Enable Bone location offset"

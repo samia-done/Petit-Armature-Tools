@@ -135,6 +135,12 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         default=True,
         options={'HIDDEN'}
     )
+    use_auto_increment = bpy.props.BoolProperty(
+        name="Auto Increment",
+        description="Enable auto increment of start number",
+        default=True,
+        options={'HIDDEN'}
+    )
     use_offset = bpy.props.BoolProperty(
         name="Offset",
         description="Enable Bone location offset",
@@ -454,6 +460,10 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         self.new_bone_names = self._get_new_bone_names()
 
+        # 開始番号にボーンの数を足す
+        if self.pat_tool_settings.use_auto_increment:
+            self.pat_tool_settings.start_number += len(self.new_bones)
+
         # ボーンネームが空の場合は終了
         for bone_name in self.new_bone_names:
             if bone_name == '':
@@ -542,7 +552,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             if e in selected_edges:
                 return
 
-            select_loop_edges = [s_e for s_e in bm.edges if s_e.select == True]
+            select_loop_edges = [s_e for s_e in bm.edges if s_e.select]
             selected_edges += select_loop_edges
 
             if i > 0:
@@ -601,6 +611,10 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             return {'FINISHED'}
 
         self.new_bone_names = self._get_new_bone_names()
+
+        # 開始番号にボーンの数を足す
+        if self.pat_tool_settings.use_auto_increment:
+            self.pat_tool_settings.start_number += len(self.new_bones)
 
         # ボーンネームが空の場合は終了
         for bone_name in self.new_bone_names:
@@ -683,6 +697,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             box.prop(pat_tool_settings, "zero_padding")
             box.prop(pat_tool_settings, "use_auto_bone_roll")
             box.prop(pat_tool_settings, "use_auto_bone_weight")
+            box.prop(pat_tool_settings, "use_auto_increment")
             box.prop(pat_tool_settings, "is_parent")
             # box.prop(pat_tool_settings, "is_reverse")
             box_col = box.column(align=True)
@@ -729,6 +744,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             box.prop(pat_tool_settings, "start_number")
             box.prop(pat_tool_settings, "zero_padding")
             box.prop(pat_tool_settings, "use_auto_bone_weight")
+            box.prop(pat_tool_settings, "use_auto_increment")
             box.prop(pat_tool_settings, "is_parent")
             # box.prop(pat_tool_settings, "is_reverse")
             box_col = box.column(align=True)
