@@ -25,7 +25,9 @@ def make_annotations(cls):
     if bpy.app.version[0] >= 2 and bpy.app.version[1] < 80:
         return cls
 
-    props = {k: v for k, v in cls.__dict__.items() if isinstance(v, tuple)}
+    props = {k: v
+             for k, v in cls.__dict__.items()
+             if isinstance(v, getattr(bpy.props, '_PropertyDeferred', tuple))}
     if props:
         if '__annotations__' not in cls.__dict__:
             setattr(cls, '__annotations__', {})

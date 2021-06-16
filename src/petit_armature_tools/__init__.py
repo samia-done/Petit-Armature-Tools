@@ -40,7 +40,7 @@ import bpy
 bl_info = {
     "name": "Petit Armature Tools",
     "author": "Samia",
-    "version": (0, 1),
+    "version": (0, 2),
     "blender": (2, 80, 0),
     "location": "View3D > Sidebar > Edit Tab",
     "description": "Petit Armature Tools",
