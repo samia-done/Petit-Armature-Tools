@@ -35,35 +35,35 @@ def get_update_candidate_branches(_, __):
 # Define Panel classes for updating
 
 
-def update_panel(self, context):
-    panels = (
-        pat_operator.VIEW3D_PT_edit_petit_armature_tools,
-    )
-    message = "Updating Panel locations has failed"
-    try:
-        for panel in panels:
-            if "bl_rna" in panel.__dict__:
-                bpy.utils.unregister_class(panel)
-
-        for panel in panels:
-            panel.bl_category = context.user_preferences.addons[__package__].preferences.category if bpy.app.version < (2, 80) else context.preferences.addons[__package__].preferences.category
-            bpy.utils.register_class(panel)
-
-    except Exception as e:
-        print("\n[{}]\n{}\n\nError:\n{}".format(__name__, message, e))
-        pass
+# def update_panel(self, context):
+#     panels = (
+#         pat_operator.VIEW3D_PT_edit_petit_armature_tools,
+#     )
+#     message = "Updating Panel locations has failed"
+#     try:
+#         for panel in panels:
+#             if "bl_rna" in panel.__dict__:
+#                 bpy.utils.unregister_class(panel)
+#
+#         for panel in panels:
+#             panel.bl_category = context.user_preferences.addons[__package__].preferences.category if bpy.app.version < (2, 80) else context.preferences.addons[__package__].preferences.category
+#             bpy.utils.register_class(panel)
+#
+#     except Exception as e:
+#         print("\n[{}]\n{}\n\nError:\n{}".format(__name__, message, e))
+#         pass
 
 
 @make_annotations
 class PAT_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
 
-    category = bpy.props.StringProperty(
-        name="Tab Category",
-        description="Choose a name for the category of the panel",
-        default="Tools" if bpy.app.version < (2, 80) else "Edit",
-        update=update_panel
-    )
+    # category = bpy.props.StringProperty(
+    #     name="Tab Category",
+    #     description="Choose a name for the category of the panel",
+    #     default="Tools" if bpy.app.version < (2, 80) else "Edit",
+    #     update=update_panel
+    # )
 
     # for add-on updater
     updater_branch_to_update = bpy.props.EnumProperty(
@@ -77,8 +77,8 @@ class PAT_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row()
-        col = row.column()
-        col.label(text="Tab Category:")
-        col.prop(self, "category", text="")
+        # row = layout.row()
+        # col = row.column()
+        # col.label(text="Tab Category:")
+        # col.prop(self, "category", text="")
         updater.draw_updater_ui(self)

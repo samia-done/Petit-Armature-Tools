@@ -40,7 +40,7 @@ import bpy
 bl_info = {
     "name": "Petit Armature Tools",
     "author": "Samia",
-    "version": (0, 2),
+    "version": (0, 3),
     "blender": (2, 80, 0),
     "location": "View3D > Sidebar > Edit Tab",
     "description": "Petit Armature Tools",
@@ -80,7 +80,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.PAT_ToolSettings = bpy.props.PointerProperty(type=pat_operator.PAT_ToolSettings)
-    pat_preferences.update_panel(None, bpy.context)
+    # pat_preferences.update_panel(None, bpy.context)
 
     bpy.app.translations.register(__name__, get_translation_dict())
 
