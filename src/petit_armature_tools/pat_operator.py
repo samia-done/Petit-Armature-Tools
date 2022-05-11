@@ -25,7 +25,15 @@ import math
 import mathutils
 
 
-def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, count=0, zero_padding=3):
+def create_name(
+    base_name,
+    separator=".",
+    prefix="",
+    suffix="",
+    start_number=1,
+    count=0,
+    zero_padding=3,
+):
     """
     名前を作成します
     :param base_name: 名前の基本形
@@ -55,7 +63,11 @@ def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, 
     if suffix:
         bone_name_suffix = separator + suffix
 
-    return bone_name_prefix + str(start_number + count).rjust(zero_padding, '0') + bone_name_suffix
+    return (
+        bone_name_prefix
+        + str(start_number + count).rjust(zero_padding, "0")
+        + bone_name_suffix
+    )
 
 
 # def target_armature_poll(self, context):
@@ -105,82 +117,76 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         name="Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Oder",
         default=False,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     display_edge_loop_order: bpy.props.BoolProperty(
         name="Midpoint of Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Loop Oder",
         default=False,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     edge_offset: bpy.props.FloatProperty(
         name="Offset",
         description="Offset value",
         default=0.0,
-        unit='LENGTH',
-        options={'HIDDEN'}
+        unit="LENGTH",
+        options={"HIDDEN"},
     )
     use_auto_bone_roll: bpy.props.BoolProperty(
         name="Auto Bone Roll",
         description="Enable Auto bone roll",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_auto_bone_weight: bpy.props.BoolProperty(
         name="Auto Bone Weight",
         description="Enable Auto bone weights",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_auto_increment: bpy.props.BoolProperty(
         name="Auto Increment",
         description="Enable auto increment of start number",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_offset: bpy.props.BoolProperty(
         name="Offset",
         description="Enable Bone location offset",
         default=False,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     bone_name_base: bpy.props.StringProperty(
         name="Base Name",
         description="Base of bone name",
         default="Bone",
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     bone_name_junction: bpy.props.StringProperty(
         name="Separator",
         description="Bone name separator",
         default=".",
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
-        name="Prefix",
-        description="Bone name prefix",
-        default="",
-        options={'HIDDEN'}
     bone_name_prefix: bpy.props.StringProperty(
+        name="Prefix", description="Bone name prefix", default="", options={"HIDDEN"}
     )
-        name="Suffix",
-        description="Bone name suffix",
-        default="",
-        options={'HIDDEN'}
     bone_name_suffix: bpy.props.StringProperty(
+        name="Suffix", description="Bone name suffix", default="", options={"HIDDEN"}
     )
     start_number: bpy.props.IntProperty(
         name="Start Number",
         description="Starting number of bone name",
         default=1,
         min=0,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     zero_padding: bpy.props.IntProperty(
         name="Zero-padding",
         description="Zero-padding of digits in bone names",
         default=3,
         min=1,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     # is_reverse : bpy.props.BoolProperty(
     #     name="Reverse",
@@ -192,13 +198,13 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
         name="Parent",
         description="Set the previously created bone as the parent",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_connect: bpy.props.BoolProperty(
         name="Connected",
         description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
 
 
@@ -207,44 +213,46 @@ class PAT_OT_Base:
         name="Offset",
         description="Enable Bone location offset",
         default=False,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     offset: bpy.props.FloatProperty(
         name="Offset",
         description="Offset value",
         default=0.0,
-        unit='LENGTH',
-        options={'HIDDEN'}
+        unit="LENGTH",
+        options={"HIDDEN"},
     )
     use_auto_bone_roll: bpy.props.BoolProperty(
         name="Auto Bone Roll",
         description="Enable Auto bone roll",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_auto_bone_weight: bpy.props.BoolProperty(
         name="Auto Bone Weight",
         description="Enable Auto bone weights",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
-    is_parent = bpy.props.BoolProperty(
+    is_parent: bpy.props.BoolProperty(
         name="Parent",
         description="Set the previously created bone as the parent",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
     use_connect: bpy.props.BoolProperty(
         name="Connected",
         description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
-        options={'HIDDEN'}
+        options={"HIDDEN"},
     )
 
     def _get_distance(self, vector0, vector1):
-        distance = math.sqrt((vector0[0] - vector1[0]) ** 2 +
-                             (vector0[1] - vector1[1]) ** 2 +
-                             (vector0[2] - vector1[2]) ** 2)
+        distance = math.sqrt(
+            (vector0[0] - vector1[0]) ** 2
+            + (vector0[1] - vector1[1]) ** 2
+            + (vector0[2] - vector1[2]) ** 2
+        )
         return distance
 
     def __init__(self):
@@ -257,38 +265,44 @@ class PAT_OT_Base:
     @classmethod
     def poll(cls, context):
         obj = context.active_object
-        if obj and obj.type == 'MESH' and obj.mode == 'EDIT':
+        if obj and obj.type == "MESH" and obj.mode == "EDIT":
             # Check if select_mode is 'EDGE'
             if context.scene.tool_settings.mesh_select_mode[1]:
                 return True
         return False
 
     def invoke(self, context, event):
-        self.pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
+        self.pat_tool_settings = (
+            context.scene.PAT_ToolSettings
+        )  # type: PAT_ToolSettings
         self.mesh_object = context.active_object
         self.mesh_object.update_from_editmode()
         self.matrix_world = self.mesh_object.matrix_world
 
     def execute(self, context):
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
-        bpy.ops.object.add(type='ARMATURE', enter_editmode=True)
+        bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
+        bpy.ops.object.add(type="ARMATURE", enter_editmode=True)
 
         armature_object = context.active_object  # type: bpy.types.Object
-        armature_object.name = 'PAT_Armature'
+        armature_object.name = "PAT_Armature"
         armature_object.matrix_world = self.matrix_world
-        armature_object.data.name = 'PAT_Armature'
+        armature_object.data.name = "PAT_Armature"
 
         create_bones = []
         create_bones_append = create_bones.append
         parentBone = None
         normals = mathutils.Vector((0, 0, 0))
-        for i, (bone_name, new_bone) in enumerate(zip(self.new_bone_names, self.new_bones)):
-            bone = armature_object.data.edit_bones.new(bone_name)  # type: bpy.types.EditBone
-            bone.head = new_bone['head']
-            bone.tail = new_bone['tail']
+        for i, (bone_name, new_bone) in enumerate(
+            zip(self.new_bone_names, self.new_bones)
+        ):
+            bone = armature_object.data.edit_bones.new(
+                bone_name
+            )  # type: bpy.types.EditBone
+            bone.head = new_bone["head"]
+            bone.tail = new_bone["tail"]
 
             if self.use_auto_bone_roll:
-                bone.align_roll(new_bone['normal'])
+                bone.align_roll(new_bone["normal"])
                 bone.roll = math.radians(round(math.degrees(bone.roll), 0))
 
             create_bones_append(bone)
@@ -296,14 +310,14 @@ class PAT_OT_Base:
             if self.use_auto_bone_weight:
                 try:
                     vertex_groups = self.mesh_object.vertex_groups[bone_name]
-                    self.report({'ERROR'}, "The vertex group has already been created")
+                    self.report({"ERROR"}, "The vertex group has already been created")
                 except KeyError:
                     vertex_groups = self.mesh_object.vertex_groups.new(name=bone_name)
 
-                vertex_groups.add(new_bone['indexes'], 1.0, 'ADD')
+                vertex_groups.add(new_bone["indexes"], 1.0, "ADD")
 
             if self.use_offset:
-                normals += new_bone['normal']
+                normals += new_bone["normal"]
 
             if self.is_parent:
                 if parentBone:
@@ -323,15 +337,15 @@ class PAT_OT_Base:
                 else:
                     bone.translate(normal)
 
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+        bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
         if not self.use_auto_bone_roll:
-            bpy.ops.object.mode_set(mode='EDIT', toggle=False)
+            bpy.ops.object.mode_set(mode="EDIT", toggle=False)
             bpy.ops.armature.roll_clear(roll=0)
 
         if self.use_auto_bone_weight:
-            bpy.ops.object.mode_set(mode='POSE', toggle=False)
+            bpy.ops.object.mode_set(mode="POSE", toggle=False)
             if hasattr(context, "view_layer"):
                 armature_object.select_set(True)
                 context.view_layer.objects.active = self.mesh_object
@@ -342,13 +356,17 @@ class PAT_OT_Base:
                 context.scene.objects.active.select = True
 
             try:
-                modifiers = self.mesh_object.modifiers['PAT_Armature']
+                modifiers = self.mesh_object.modifiers["PAT_Armature"]
             except KeyError:
-                modifiers = self.mesh_object.modifiers.new(name='PAT_Armature', type='ARMATURE')
+                modifiers = self.mesh_object.modifiers.new(
+                    name="PAT_Armature", type="ARMATURE"
+                )
             modifiers.object = armature_object
 
-            bpy.ops.object.mode_set(mode='WEIGHT_PAINT', toggle=False)
-            bpy.ops.object.vertex_group_normalize_all(group_select_mode='BONE_SELECT', lock_active=False)
+            bpy.ops.object.mode_set(mode="WEIGHT_PAINT", toggle=False)
+            bpy.ops.object.vertex_group_normalize_all(
+                group_select_mode="BONE_SELECT", lock_active=False
+            )
 
         # if self.pat_tool_settings.target_armature:
         #     # print(pat_tool_settings.target_armature)
@@ -362,7 +380,7 @@ class PAT_OT_Base:
         #     self.active.modifiers["Armature"].object = self.pat_tool_settings.target_armature
         #     bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
 
-        bpy.ops.object.mode_set(mode='OBJECT', toggle=False)
+        bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
 
         armature_object.data.show_names = True
         if bpy.app.version < (2, 80):
@@ -375,7 +393,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
     bl_idname = "armature.pat_selected_edge_order"
     bl_label = "Create Bone:Selected Edge Order"
     bl_description = "Creates bones from selected edge order"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
     def _get_new_bones(self, context):
         return self._get_select_edge_location(context)
@@ -383,12 +401,20 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
     def _get_new_bone_names(self):
         length = len(self.new_bones)
         if length > 0:
-            return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
-                                self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
-                                self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding)
-                    for i in range(length)]
+            return [
+                create_name(
+                    self.pat_tool_settings.bone_name_base,
+                    self.pat_tool_settings.bone_name_junction,
+                    self.pat_tool_settings.bone_name_prefix,
+                    self.pat_tool_settings.bone_name_suffix,
+                    self.pat_tool_settings.start_number,
+                    i,
+                    self.pat_tool_settings.zero_padding,
+                )
+                for i in range(length)
+            ]
         else:
-            return ['']
+            return [""]
 
     def _get_select_edge_location(self, context):
         bm = bmesh.new()
@@ -409,7 +435,9 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
                 v0 = e.verts[0]
                 v1 = e.verts[1]
                 if head:
-                    if self._get_distance(head.co, v0.co) > self._get_distance(head.co, v1.co):
+                    if self._get_distance(head.co, v0.co) > self._get_distance(
+                        head.co, v1.co
+                    ):
                         v0, v1 = v1, v0
                     if not self.use_connect:
                         head = v0
@@ -419,14 +447,22 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
                         v2 = bm.select_history[i + 1].verts[0]
                         v3 = bm.select_history[i + 1].verts[1]
 
-                        if self._get_distance(v0.co, v2.co) < self._get_distance(v1.co, v2.co):
+                        if self._get_distance(v0.co, v2.co) < self._get_distance(
+                            v1.co, v2.co
+                        ):
                             v0, v1 = v1, v0
                     head = v0
                     tail = v1
 
                 normal = (head.normal + tail.normal) / 2
-                new_bones.append({"indexes": (copy.copy(head.index), copy.copy(tail.index)), "head": copy.copy(head.co),
-                                  "tail": copy.copy(tail.co), "normal": copy.copy(normal.normalized())})
+                new_bones.append(
+                    {
+                        "indexes": (copy.copy(head.index), copy.copy(tail.index)),
+                        "head": copy.copy(head.co),
+                        "tail": copy.copy(tail.co),
+                        "normal": copy.copy(normal.normalized()),
+                    }
+                )
                 head = tail
 
         for edge in selected_edges:
@@ -443,15 +479,15 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         # 辺が一つも無い場合は終了
         if len(self.mesh_object.data.edges) < 1:
-            self.report({'ERROR'}, "This mesh does not have edges")
-            return {'FINISHED'}
+            self.report({"ERROR"}, "This mesh does not have edges")
+            return {"FINISHED"}
 
         self.new_bones = self._get_new_bones(context)
 
         # 作成するボーンデータが一つも無い場合は終了
         if not self.new_bones:
-            self.report({'ERROR'}, "Select at least one edge")
-            return {'FINISHED'}
+            self.report({"ERROR"}, "Select at least one edge")
+            return {"FINISHED"}
 
         self.new_bone_names = self._get_new_bone_names()
 
@@ -461,30 +497,29 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         # ボーンネームが空の場合は終了
         for bone_name in self.new_bone_names:
-            if bone_name == '':
-                self.report({'ERROR'}, "No blank names are allowed")
-                return {'FINISHED'}
+            if bone_name == "":
+                self.report({"ERROR"}, "No blank names are allowed")
+                return {"FINISHED"}
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
             for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
                 if vg.name in self.new_bone_names:
-                    self.report({'ERROR'}, "The vertex group has already been created")
-                    return {'FINISHED'}
+                    self.report({"ERROR"}, "The vertex group has already been created")
+                    return {"FINISHED"}
 
         return self.execute(context)
 
     def execute(self, context):
         super(PAT_OT_SelectedEdgeOrder, self).execute(context)
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
-@make_annotations
 class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
     bl_idname = "armature.pat_midpoint_of_selected_edge_loop_order"
     bl_label = "Create Bone:Midpoint of selected Edge Loop Oder"
     bl_description = "Creates bones at the midpoint of selected edge loop order"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
     def _get_new_bones(self, context):
         return self._get_select_edge_loops_location(context)
@@ -492,12 +527,20 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
     def _get_new_bone_names(self):
         length = len(self.new_bones)
         if length > 0:
-            return [create_name(self.pat_tool_settings.bone_name_base, self.pat_tool_settings.bone_name_junction,
-                                self.pat_tool_settings.bone_name_prefix, self.pat_tool_settings.bone_name_suffix,
-                                self.pat_tool_settings.start_number, i, self.pat_tool_settings.zero_padding)
-                    for i in range(length)]
+            return [
+                create_name(
+                    self.pat_tool_settings.bone_name_base,
+                    self.pat_tool_settings.bone_name_junction,
+                    self.pat_tool_settings.bone_name_prefix,
+                    self.pat_tool_settings.bone_name_suffix,
+                    self.pat_tool_settings.start_number,
+                    i,
+                    self.pat_tool_settings.zero_padding,
+                )
+                for i in range(length)
+            ]
         else:
-            return ['']
+            return [""]
 
     def _get_select_edge_loops_location(self, context):
         bm = bmesh.new()
@@ -507,8 +550,11 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
             bm.edges.ensure_lookup_table()
             bm.faces.ensure_lookup_table()
 
-        current_cursor = copy.copy(context.scene.cursor_location) if bpy.app.version < (2, 80) \
+        current_cursor = (
+            copy.copy(context.scene.cursor_location)
+            if bpy.app.version < (2, 80)
             else copy.copy(context.scene.cursor.location)
+        )
 
         select_history = []
         select_history_append = select_history.append
@@ -520,7 +566,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
         if len(select_history) < 2:
             return
 
-        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy.ops.mesh.select_all(action="DESELECT")
         self.mesh_object.update_from_editmode()
 
         # ローカルビューが有効になっている場合、一時的に解除
@@ -554,24 +600,36 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
                 tail_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
 
                 bpy.ops.view3d.snap_cursor_to_selected()
-                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                local_cursor_location = (
+                    mwi * context.scene.cursor_location
+                    if bpy.app.version < (2, 80)
                     else mwi @ context.scene.cursor.location
+                )
 
                 tail = copy.copy(local_cursor_location)
 
-                new_bones.append({"indexes": tuple(head_indexes + tail_indexes), "head": head, "tail": tail})
+                new_bones.append(
+                    {
+                        "indexes": tuple(head_indexes + tail_indexes),
+                        "head": head,
+                        "tail": tail,
+                    }
+                )
                 head = tail
                 head_indexes = tail_indexes
             else:
                 head_indexes = [v.index for s_e in select_loop_edges for v in s_e.verts]
 
                 bpy.ops.view3d.snap_cursor_to_selected()
-                local_cursor_location = mwi * context.scene.cursor_location if bpy.app.version < (2, 80)\
+                local_cursor_location = (
+                    mwi * context.scene.cursor_location
+                    if bpy.app.version < (2, 80)
                     else mwi @ context.scene.cursor.location
+                )
 
                 head = copy.copy(local_cursor_location)
 
-            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy.ops.mesh.select_all(action="DESELECT")
 
         if current_local:
             bpy.ops.view3d.localview()
@@ -595,15 +653,15 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
 
         # 辺が2つ以上無い場合は終了
         if len(self.mesh_object.data.edges) < 2:
-            self.report({'ERROR'}, "This mesh does not have multiple edges")
-            return {'FINISHED'}
+            self.report({"ERROR"}, "This mesh does not have multiple edges")
+            return {"FINISHED"}
 
         self.new_bones = self._get_new_bones(context)
 
         # 作成するボーンデータが一つも無い場合は終了
         if not self.new_bones:
-            self.report({'ERROR'}, "Select at least two edge loops")
-            return {'FINISHED'}
+            self.report({"ERROR"}, "Select at least two edge loops")
+            return {"FINISHED"}
 
         self.new_bone_names = self._get_new_bone_names()
 
@@ -613,31 +671,30 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
 
         # ボーンネームが空の場合は終了
         for bone_name in self.new_bone_names:
-            if bone_name == '':
-                self.report({'ERROR'}, "No blank names are allowed")
-                return {'FINISHED'}
+            if bone_name == "":
+                self.report({"ERROR"}, "No blank names are allowed")
+                return {"FINISHED"}
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
             for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
                 if vg.name in self.new_bone_names:
-                    self.report({'ERROR'}, "The vertex group has already been created")
-                    return {'FINISHED'}
+                    self.report({"ERROR"}, "The vertex group has already been created")
+                    return {"FINISHED"}
 
         return self.execute(context)
 
     def execute(self, context):
         super(PAT_OT_MidpointOfSelectedEdgeLoopOder, self).execute(context)
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
-@make_annotations
 class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'TOOLS' if bpy.app.version < (2, 80) else 'UI'
-    bl_category = 'Tools' if bpy.app.version < (2, 80) else 'Edit'
-    bl_context = 'mesh_edit'
-    bl_label = 'Petit Armature Tools'
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "TOOLS" if bpy.app.version < (2, 80) else "UI"
+    bl_category = "Tools" if bpy.app.version < (2, 80) else "Edit"
+    bl_context = "mesh_edit"
+    bl_label = "Petit Armature Tools"
 
     # bl_options = {'DEFAULT_CLOSED'}
 
@@ -652,17 +709,25 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         layout.label(text="Create Bone:")
         col = layout.column(align=True)
 
-        split = col.split(percentage=0.15, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.15,
-                                                                                                   align=True)
+        split = (
+            col.split(percentage=0.15, align=True)
+            if bpy.app.version < (2, 80)
+            else col.split(factor=0.15, align=True)
+        )
 
         if pat_tool_settings.display_edge_oder:
-            split.prop(pat_tool_settings, "display_edge_oder", text="", icon='DOWNARROW_HLT')
+            split.prop(
+                pat_tool_settings, "display_edge_oder", text="", icon="DOWNARROW_HLT"
+            )
         else:
-            split.prop(pat_tool_settings, "display_edge_oder", text="", icon='RIGHTARROW')
+            split.prop(
+                pat_tool_settings, "display_edge_oder", text="", icon="RIGHTARROW"
+            )
 
-        split.operator_context = 'INVOKE_DEFAULT'
-        op = split.operator(PAT_OT_SelectedEdgeOrder.bl_idname,
-                            text="Selected Edge Order")  # type: PAT_OT_SelectedEdgeOrder
+        split.operator_context = "INVOKE_DEFAULT"
+        op = split.operator(
+            PAT_OT_SelectedEdgeOrder.bl_idname, text="Selected Edge Order"
+        )  # type: PAT_OT_SelectedEdgeOrder
         op.use_auto_bone_roll = pat_tool_settings.use_auto_bone_roll
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = pat_tool_settings.use_offset
@@ -670,9 +735,15 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op.is_parent = pat_tool_settings.is_parent
         op.use_connect = pat_tool_settings.use_connect
 
-        bone_name = create_name(pat_tool_settings.bone_name_base, pat_tool_settings.bone_name_junction,
-                                pat_tool_settings.bone_name_prefix, pat_tool_settings.bone_name_suffix,
-                                pat_tool_settings.start_number, 0, pat_tool_settings.zero_padding)
+        bone_name = create_name(
+            pat_tool_settings.bone_name_base,
+            pat_tool_settings.bone_name_junction,
+            pat_tool_settings.bone_name_prefix,
+            pat_tool_settings.bone_name_suffix,
+            pat_tool_settings.start_number,
+            0,
+            pat_tool_settings.zero_padding,
+        )
         # SelectedEdgeOrder - settings
         if pat_tool_settings.display_edge_oder:
             box = col.column(align=True).box().column()
@@ -704,16 +775,28 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
             row.prop(pat_tool_settings, "edge_offset", text="")
             row.active = pat_tool_settings.use_offset
 
-        split = col.split(percentage=0.15, align=True) if bpy.app.version < (2, 80) else col.split(factor=0.15,
-                                                                                                   align=True)
+        split = (
+            col.split(percentage=0.15, align=True)
+            if bpy.app.version < (2, 80)
+            else col.split(factor=0.15, align=True)
+        )
         if pat_tool_settings.display_edge_loop_order:
-            split.prop(pat_tool_settings, "display_edge_loop_order", text="", icon='DOWNARROW_HLT')
+            split.prop(
+                pat_tool_settings,
+                "display_edge_loop_order",
+                text="",
+                icon="DOWNARROW_HLT",
+            )
         else:
-            split.prop(pat_tool_settings, "display_edge_loop_order", text="", icon='RIGHTARROW')
+            split.prop(
+                pat_tool_settings, "display_edge_loop_order", text="", icon="RIGHTARROW"
+            )
 
-        split.operator_context = 'INVOKE_DEFAULT'
-        op = split.operator(PAT_OT_MidpointOfSelectedEdgeLoopOder.bl_idname,
-                            text="Midpoint of Selected Edge Loop Oder")  # type: PAT_OT_MidpointOfSelectedEdgeLoopOder
+        split.operator_context = "INVOKE_DEFAULT"
+        op = split.operator(
+            PAT_OT_MidpointOfSelectedEdgeLoopOder.bl_idname,
+            text="Midpoint of Selected Edge Loop Oder",
+        )  # type: PAT_OT_MidpointOfSelectedEdgeLoopOder
         op.use_auto_bone_roll = False
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = False

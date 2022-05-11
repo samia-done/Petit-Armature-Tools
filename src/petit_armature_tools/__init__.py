@@ -44,33 +44,36 @@ bl_info = {
     "support": "COMMUNITY",
     "wiki_url": "https://github.com/samia-done/Petit-Armature-Tools",
     "tracker_url": "https://github.com/samia-done/Petit-Armature-Tools/issues",
-    "category": "Armature"
+    "category": "Armature",
 }
 
 classes = (
     pat_operator.PAT_ToolSettings,
     pat_operator.PAT_OT_SelectedEdgeOrder,
     pat_operator.PAT_OT_MidpointOfSelectedEdgeLoopOder,
-    pat_operator.VIEW3D_PT_edit_petit_armature_tools
+    pat_operator.VIEW3D_PT_edit_petit_armature_tools,
 )
 
 
 def get_translation_dict():
     translation_dict = {}
     path = os.path.join(os.path.dirname(__file__), "translation_dictionary.csv")
-    with codecs.open(path, 'r', 'utf-8') as f:
+    with codecs.open(path, "r", "utf-8") as f:
         reader = csv.reader(f)
-        translation_dict['ja_JP'] = {}
+        translation_dict["ja_JP"] = {}
         for row in reader:
             for context in bpy.app.translations.contexts:
-                translation_dict['ja_JP'][(context, row[1])] = row[0]
+                translation_dict["ja_JP"][(context, row[1])] = row[0]
     return translation_dict
 
 
 def register():
+
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.Scene.PAT_ToolSettings = bpy.props.PointerProperty(type=pat_operator.PAT_ToolSettings)
+    bpy.types.Scene.PAT_ToolSettings = bpy.props.PointerProperty(
+        type=pat_operator.PAT_ToolSettings
+    )
 
     bpy.app.translations.register(__name__, get_translation_dict())
 
