@@ -272,9 +272,7 @@ class PAT_OT_Base:
         return False
 
     def invoke(self, context, event):
-        self.pat_tool_settings = (
-            context.scene.PAT_ToolSettings
-        )  # type: PAT_ToolSettings
+        self.pat_tool_settings = context.scene.PAT_ToolSettings
         self.mesh_object = context.active_object
         self.mesh_object.update_from_editmode()
         self.matrix_world = self.mesh_object.matrix_world
@@ -283,7 +281,7 @@ class PAT_OT_Base:
         bpy.ops.object.mode_set(mode="OBJECT", toggle=False)
         bpy.ops.object.add(type="ARMATURE", enter_editmode=True)
 
-        armature_object = context.active_object  # type: bpy.types.Object
+        armature_object = context.active_object
         armature_object.name = "PAT_Armature"
         armature_object.matrix_world = self.matrix_world
         armature_object.data.name = "PAT_Armature"
@@ -295,9 +293,7 @@ class PAT_OT_Base:
         for i, (bone_name, new_bone) in enumerate(
             zip(self.new_bone_names, self.new_bones)
         ):
-            bone = armature_object.data.edit_bones.new(
-                bone_name
-            )  # type: bpy.types.EditBone
+            bone = armature_object.data.edit_bones.new(bone_name)
             bone.head = new_bone["head"]
             bone.tail = new_bone["tail"]
 
@@ -429,7 +425,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
         head = None
         tail = None
 
-        for i, e in enumerate(bm.select_history):  # type: (int, bmesh.types.BMEdge)
+        for i, e in enumerate(bm.select_history):
             if isinstance(e, bmesh.types.BMEdge) and e.select:
                 selected_edges.append(e)
                 v0 = e.verts[0]
@@ -503,7 +499,7 @@ class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
-            for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
+            for vg in self.mesh_object.vertex_groups:
                 if vg.name in self.new_bone_names:
                     self.report({"ERROR"}, "The vertex group has already been created")
                     return {"FINISHED"}
@@ -677,7 +673,7 @@ class PAT_OT_MidpointOfSelectedEdgeLoopOder(PAT_OT_Base, bpy.types.Operator):
 
         # オートウェイトが有効で、作成するボーンと同名の頂点グループがある場合は終了
         if self.use_auto_bone_weight:
-            for vg in self.mesh_object.vertex_groups:  # type: bpy.types.VertexGroup
+            for vg in self.mesh_object.vertex_groups:
                 if vg.name in self.new_bone_names:
                     self.report({"ERROR"}, "The vertex group has already been created")
                     return {"FINISHED"}
@@ -703,7 +699,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         return True
 
     def draw(self, context):
-        pat_tool_settings = context.scene.PAT_ToolSettings  # type: PAT_ToolSettings
+        pat_tool_settings = context.scene.PAT_ToolSettings
 
         layout = self.layout
         layout.label(text="Create Bone:")
@@ -727,7 +723,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         split.operator_context = "INVOKE_DEFAULT"
         op = split.operator(
             PAT_OT_SelectedEdgeOrder.bl_idname, text="Selected Edge Order"
-        )  # type: PAT_OT_SelectedEdgeOrder
+        )
         op.use_auto_bone_roll = pat_tool_settings.use_auto_bone_roll
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = pat_tool_settings.use_offset
@@ -796,7 +792,7 @@ class VIEW3D_PT_edit_petit_armature_tools(bpy.types.Panel):
         op = split.operator(
             PAT_OT_MidpointOfSelectedEdgeLoopOder.bl_idname,
             text="Midpoint of Selected Edge Loop Oder",
-        )  # type: PAT_OT_MidpointOfSelectedEdgeLoopOder
+        )
         op.use_auto_bone_roll = False
         op.use_auto_bone_weight = pat_tool_settings.use_auto_bone_weight
         op.use_offset = False
