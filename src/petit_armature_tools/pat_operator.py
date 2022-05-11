@@ -24,8 +24,6 @@ import copy
 import math
 import mathutils
 
-from .utils.bl_anotations import make_annotations
-
 
 def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, count=0, zero_padding=3):
     """
@@ -89,7 +87,6 @@ def create_name(base_name, separator='.', prefix='', suffix='', start_number=1, 
 #     self.target_bone = ''
 
 
-@make_annotations
 class PAT_ToolSettings(bpy.types.PropertyGroup):
     # target_armature = bpy.props.PointerProperty(
     #     name="Target Armature",
@@ -104,100 +101,100 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     #     description="",
     #     options={'HIDDEN'}
     # )
-    display_edge_oder = bpy.props.BoolProperty(
+    display_edge_oder: bpy.props.BoolProperty(
         name="Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Oder",
         default=False,
         options={'HIDDEN'}
     )
-    display_edge_loop_order = bpy.props.BoolProperty(
+    display_edge_loop_order: bpy.props.BoolProperty(
         name="Midpoint of Selected Edge Loop Oder Settings",
         description="Display Settings of Selected Edge Loop Oder",
         default=False,
         options={'HIDDEN'}
     )
-    edge_offset = bpy.props.FloatProperty(
+    edge_offset: bpy.props.FloatProperty(
         name="Offset",
         description="Offset value",
         default=0.0,
         unit='LENGTH',
         options={'HIDDEN'}
     )
-    use_auto_bone_roll = bpy.props.BoolProperty(
+    use_auto_bone_roll: bpy.props.BoolProperty(
         name="Auto Bone Roll",
         description="Enable Auto bone roll",
         default=True,
         options={'HIDDEN'}
     )
-    use_auto_bone_weight = bpy.props.BoolProperty(
+    use_auto_bone_weight: bpy.props.BoolProperty(
         name="Auto Bone Weight",
         description="Enable Auto bone weights",
         default=True,
         options={'HIDDEN'}
     )
-    use_auto_increment = bpy.props.BoolProperty(
+    use_auto_increment: bpy.props.BoolProperty(
         name="Auto Increment",
         description="Enable auto increment of start number",
         default=True,
         options={'HIDDEN'}
     )
-    use_offset = bpy.props.BoolProperty(
+    use_offset: bpy.props.BoolProperty(
         name="Offset",
         description="Enable Bone location offset",
         default=False,
         options={'HIDDEN'}
     )
-    bone_name_base = bpy.props.StringProperty(
+    bone_name_base: bpy.props.StringProperty(
         name="Base Name",
         description="Base of bone name",
         default="Bone",
         options={'HIDDEN'}
     )
-    bone_name_junction = bpy.props.StringProperty(
+    bone_name_junction: bpy.props.StringProperty(
         name="Separator",
         description="Bone name separator",
         default=".",
         options={'HIDDEN'}
     )
-    bone_name_prefix = bpy.props.StringProperty(
         name="Prefix",
         description="Bone name prefix",
         default="",
         options={'HIDDEN'}
+    bone_name_prefix: bpy.props.StringProperty(
     )
-    bone_name_suffix = bpy.props.StringProperty(
         name="Suffix",
         description="Bone name suffix",
         default="",
         options={'HIDDEN'}
+    bone_name_suffix: bpy.props.StringProperty(
     )
-    start_number = bpy.props.IntProperty(
+    start_number: bpy.props.IntProperty(
         name="Start Number",
         description="Starting number of bone name",
         default=1,
         min=0,
         options={'HIDDEN'}
     )
-    zero_padding = bpy.props.IntProperty(
+    zero_padding: bpy.props.IntProperty(
         name="Zero-padding",
         description="Zero-padding of digits in bone names",
         default=3,
         min=1,
         options={'HIDDEN'}
     )
-    # is_reverse = bpy.props.BoolProperty(
+    # is_reverse : bpy.props.BoolProperty(
     #     name="Reverse",
     #     description="Change the bone order to the reverse order",
     #     default=False,
     #     options={'HIDDEN'}
     # )
-    is_parent = bpy.props.BoolProperty(
+    is_parent: bpy.props.BoolProperty(
         name="Parent",
         description="Set the previously created bone as the parent",
         default=True,
         options={'HIDDEN'}
     )
-    use_connect = bpy.props.BoolProperty(
+    use_connect: bpy.props.BoolProperty(
         name="Connected",
         description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
@@ -205,28 +202,27 @@ class PAT_ToolSettings(bpy.types.PropertyGroup):
     )
 
 
-@make_annotations
 class PAT_OT_Base:
-    use_offset = bpy.props.BoolProperty(
+    use_offset: bpy.props.BoolProperty(
         name="Offset",
         description="Enable Bone location offset",
         default=False,
         options={'HIDDEN'}
     )
-    offset = bpy.props.FloatProperty(
+    offset: bpy.props.FloatProperty(
         name="Offset",
         description="Offset value",
         default=0.0,
         unit='LENGTH',
         options={'HIDDEN'}
     )
-    use_auto_bone_roll = bpy.props.BoolProperty(
+    use_auto_bone_roll: bpy.props.BoolProperty(
         name="Auto Bone Roll",
         description="Enable Auto bone roll",
         default=True,
         options={'HIDDEN'}
     )
-    use_auto_bone_weight = bpy.props.BoolProperty(
+    use_auto_bone_weight: bpy.props.BoolProperty(
         name="Auto Bone Weight",
         description="Enable Auto bone weights",
         default=True,
@@ -238,7 +234,7 @@ class PAT_OT_Base:
         default=True,
         options={'HIDDEN'}
     )
-    use_connect = bpy.props.BoolProperty(
+    use_connect: bpy.props.BoolProperty(
         name="Connected",
         description="When Bone has a parent,bone's head is stuck to the parent's tail",
         default=True,
@@ -375,7 +371,6 @@ class PAT_OT_Base:
             armature_object.show_in_front = True
 
 
-@make_annotations
 class PAT_OT_SelectedEdgeOrder(PAT_OT_Base, bpy.types.Operator):
     bl_idname = "armature.pat_selected_edge_order"
     bl_label = "Create Bone:Selected Edge Order"

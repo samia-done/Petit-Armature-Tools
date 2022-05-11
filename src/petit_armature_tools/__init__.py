@@ -24,16 +24,12 @@ import csv
 
 if "bpy" in locals():
     import importlib
-    importlib.reload(utils)
+
     importlib.reload(pat_operator)
-    importlib.reload(pat_preferences)
-    importlib.reload(updater)
 else:
     import bpy
-    from . import utils
+
     from . import pat_operator
-    from . import pat_preferences
-    from . import updater
 
 import bpy
 
@@ -52,9 +48,6 @@ bl_info = {
 }
 
 classes = (
-    pat_preferences.PAT_AddonPreferences,
-    updater.PAT_OT_CheckAddonUpdate,
-    updater.PAT_OT_UpdateAddon,
     pat_operator.PAT_ToolSettings,
     pat_operator.PAT_OT_SelectedEdgeOrder,
     pat_operator.PAT_OT_MidpointOfSelectedEdgeLoopOder,
@@ -75,12 +68,9 @@ def get_translation_dict():
 
 
 def register():
-    updater.register_updater(bl_info)
-
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Scene.PAT_ToolSettings = bpy.props.PointerProperty(type=pat_operator.PAT_ToolSettings)
-    # pat_preferences.update_panel(None, bpy.context)
 
     bpy.app.translations.register(__name__, get_translation_dict())
 
